@@ -33,7 +33,11 @@ export async function POST(request: NextRequest) {
   const ext = file.name.split(".").pop() || "jpg";
   const key = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-  const url = await uploadToR2(buffer, key, file.type);
-
-  return NextResponse.json({ url });
+  try {
+    const url = await uploadToR2(buffer, key, file.type);
+    return NextResponse.json({ url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Yükleme başarısız";
+    return NextResponse.json({ error: `R2 yükleme hatası: ${message}` }, { status: 500 });
+  }
 }

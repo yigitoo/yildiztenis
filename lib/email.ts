@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
-import { getEmailLogoDataUri } from "@/lib/email-logo";
+import { getEmailLogoUrl } from "@/lib/email-logo";
 
 type WorkshopEmailPayload = {
   to: string;
@@ -35,10 +35,8 @@ const smtpTransport =
     : null;
 
 function brandedTemplate(title: string, body: string) {
-  const logo = getEmailLogoDataUri();
-  const logoHtml = logo
-    ? `<img src="${logo}" alt="Yıldız Tenis" width="56" height="56" style="border-radius:14px;display:block;" />`
-    : `<div style="width:56px;height:56px;border-radius:14px;background:#007405;color:#fff;font-size:22px;font-weight:700;text-align:center;line-height:56px;">YT</div>`;
+  const logoUrl = getEmailLogoUrl();
+  const logoHtml = `<img src="${logoUrl}" alt="Yıldız Tenis" width="56" height="56" style="border-radius:14px;display:block;" />`;
 
   return `<!DOCTYPE html>
 <html lang="tr">
