@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Loader2 } from "lucide-react";
 
 import { markMessageAsRead } from "@/app/admin/actions";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,23 +26,23 @@ export function MessageTable({ messages: initial }: { messages: Message[] }) {
   const [messages, setMessages] = useState(initial);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Message | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [markingId, setMarkingId] = useState<string | null>(null);
 
   const filtered = messages.filter(m =>
     search === "" || `${m.name} ${m.email} ${m.subject}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  function handleMarkRead(msg: Message) {
-    if (msg.isRead) return;
-    startTransition(async () => {
-      const result = await markMessageAsRead(msg.id);
-      if (result.success) {
-        setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
-        toast.success("Mesaj okundu olarak işaretlendi.");
-      } else {
-        toast.error(result.error);
-      }
-    });
+  async function handleMarkRead(msg: Message) {
+    if (msg.isRead || markingId) return;
+    setMarkingId(msg.id);
+    const result = await markMessageAsRead(msg.id);
+    if (result.success) {
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
+      toast.success("Mesaj okundu olarak işaretlendi.");
+    } else {
+      toast.error(result.error);
+    }
+    setMarkingId(null);
   }
 
   return (
@@ -105,9 +105,10 @@ export function MessageTable({ messages: initial }: { messages: Message[] }) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleMarkRead(msg)}
-                            disabled={pending}
+                            disabled={markingId !== null}
                           >
-                            Okundu
+                            {markingId === msg.id && <Loader2 size={14} className="animate-spin" />}
+                            {markingId === msg.id ? "İşleniyor" : "Okundu"}
                           </Button>
                         )}
                       </div>

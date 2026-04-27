@@ -2,8 +2,8 @@
 
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import { useEffect, useState, useTransition } from "react";
-import { Download } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { updateApplicationStatus } from "@/app/admin/actions";
@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { ApplicationStatus } from "@/generated/prisma/client";
+import type { ApplicationStatus, SkillLevel } from "@/generated/prisma/client";
+import { ApplicationDetailDialog } from "@/components/admin/application-detail-dialog";
 
 type Application = {
   id: string;
@@ -24,9 +25,13 @@ type Application = {
   email: string;
   phone: string;
   school: string;
-  level: string;
+  level: SkillLevel;
+  notes: string | null;
+  answers: Record<string, string> | null;
   status: ApplicationStatus;
   createdAt: string;
+  verifiedAt: string | null;
+  acceptedAt: string | null;
   acceptanceEmailSentAt: string | null;
   workshop: { id: string; title: string };
 };
@@ -36,7 +41,8 @@ export default function ApplicationsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
-  const [pending, startTransition] = useTransition();
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/applications")
@@ -51,19 +57,19 @@ export default function ApplicationsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  function handleStatusUpdate(applicationId: string, newStatus: string) {
-    startTransition(async () => {
-      const fd = new FormData();
-      fd.set("applicationId", applicationId);
-      fd.set("status", newStatus);
-      const result = await updateApplicationStatus(null, fd);
-      if (result.success) {
-        toast.success("Başvuru durumu güncellendi.");
-        setApplications(prev => prev.map(a => a.id === applicationId ? { ...a, status: newStatus as ApplicationStatus } : a));
-      } else {
-        toast.error(result.error);
-      }
-    });
+  async function handleStatusUpdate(applicationId: string, newStatus: string) {
+    setUpdatingId(applicationId);
+    const fd = new FormData();
+    fd.set("applicationId", applicationId);
+    fd.set("status", newStatus);
+    const result = await updateApplicationStatus(null, fd);
+    if (result.success) {
+      toast.success("Başvuru durumu güncellendi.");
+      setApplications(prev => prev.map(a => a.id === applicationId ? { ...a, status: newStatus as ApplicationStatus } : a));
+    } else {
+      toast.error(result.error);
+    }
+    setUpdatingId(null);
   }
 
   return (
@@ -132,7 +138,7 @@ export default function ApplicationsPage() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map(app => (
-                    <TableRow key={app.id}>
+                    <TableRow key={app.id} className="cursor-pointer" onClick={() => setSelectedApp(app)}>
                       <TableCell>
                         <p className="font-medium">{app.firstName} {app.lastName}</p>
                         <p className="text-xs text-muted-foreground">
@@ -152,21 +158,28 @@ export default function ApplicationsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Select
-                            defaultValue={app.status}
-                            onValueChange={val => val && handleStatusUpdate(app.id, val)}
-                            disabled={pending}
-                          >
-                            <SelectTrigger className="h-8 w-[140px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="PENDING">Beklemede</SelectItem>
-                              <SelectItem value="ACCEPTED">Asil Liste</SelectItem>
-                              <SelectItem value="WAITLISTED">Yedek</SelectItem>
-                              <SelectItem value="REJECTED">Reddedildi</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          {updatingId === app.id ? (
+                            <div className="flex h-8 w-[140px] items-center justify-center gap-2 rounded-lg border border-border text-sm text-muted-foreground">
+                              <Loader2 size={14} className="animate-spin" />
+                              Güncelleniyor
+                            </div>
+                          ) : (
+                            <Select
+                              defaultValue={app.status}
+                              onValueChange={val => val && handleStatusUpdate(app.id, val)}
+                              disabled={updatingId !== null}
+                            >
+                              <SelectTrigger className="h-8 w-[140px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="PENDING">Beklemede</SelectItem>
+                                <SelectItem value="ACCEPTED">Asil Liste</SelectItem>
+                                <SelectItem value="WAITLISTED">Yedek</SelectItem>
+                                <SelectItem value="REJECTED">Reddedildi</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -177,6 +190,8 @@ export default function ApplicationsPage() {
           )}
         </CardContent>
       </Card>
+
+      <ApplicationDetailDialog application={selectedApp} onClose={() => setSelectedApp(null)} />
     </>
   );
 }

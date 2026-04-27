@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, GraduationCap, Users, Mail, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, GraduationCap, Users, Mail, LogOut, Menu, ImageIcon, UsersRound, MailCheck, ScrollText, Settings } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +18,11 @@ const navItems = [
   { href: "/admin/workshops", label: "Workshoplar", icon: GraduationCap },
   { href: "/admin/applications", label: "Başvurular", icon: Users },
   { href: "/admin/messages", label: "Mesajlar", icon: Mail },
+  { href: "/admin/gallery", label: "Galeri", icon: ImageIcon },
+  { href: "/admin/team", label: "Takım", icon: UsersRound },
+  { href: "/admin/emails", label: "E-posta Kayıtları", icon: MailCheck },
+  { href: "/admin/audit", label: "İşlem Geçmişi", icon: ScrollText },
+  { href: "/admin/settings", label: "Ayarlar", icon: Settings },
 ];
 
 function NavLink({ href, label, icon: Icon, active }: { href: string; label: string; icon: typeof LayoutDashboard; active: boolean }) {
@@ -42,8 +47,8 @@ function SidebarContent({ pathname }: { pathname: string }) {
     <div className="flex h-full flex-col">
       <div className="px-4 py-5">
         <Link className="inline-flex items-center gap-3" href="/admin">
-          <span className="relative h-10 w-10 overflow-hidden rounded-xl border border-border">
-            <Image alt="Yıldız Tenis" className="object-cover" fill sizes="40px" src="/images/yildiz-tenis-logo.png" />
+          <span className="relative h-10 w-10 overflow-hidden rounded-full">
+            <Image alt="Yıldız Tenis" className="object-cover" fill sizes="40px" src="/images/yildiz-tenis-logo-round.png" />
           </span>
           <span>
             <span className="font-display block text-lg font-semibold text-foreground">Yıldız Tenis</span>
@@ -98,8 +103,8 @@ export function AdminSidebar() {
           </SheetContent>
         </Sheet>
         <Link className="inline-flex items-center gap-2" href="/admin">
-          <span className="relative h-8 w-8 overflow-hidden rounded-lg border border-border">
-            <Image alt="Yıldız Tenis" className="object-cover" fill sizes="32px" src="/images/yildiz-tenis-logo.png" />
+          <span className="relative h-8 w-8 overflow-hidden rounded-full">
+            <Image alt="Yıldız Tenis" className="object-cover" fill sizes="32px" src="/images/yildiz-tenis-logo-round.png" />
           </span>
           <span className="font-display text-base font-semibold">Yıldız Tenis</span>
         </Link>

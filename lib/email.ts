@@ -1,11 +1,13 @@
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
+import { getEmailLogoDataUri } from "@/lib/email-logo";
 
 type WorkshopEmailPayload = {
   to: string;
   firstName: string;
   workshopTitle: string;
   workshopDate: string;
+  whatsappLink?: string | null;
 };
 
 type VerificationEmailPayload = WorkshopEmailPayload & {
@@ -32,41 +34,85 @@ const smtpTransport =
       })
     : null;
 
-const baseUrl = process.env.NEXTAUTH_URL ?? "https://yildiztenis.com";
-
 function brandedTemplate(title: string, body: string) {
+  const logo = getEmailLogoDataUri();
+  const logoHtml = logo
+    ? `<img src="${logo}" alt="Yıldız Tenis" width="56" height="56" style="border-radius:14px;display:block;" />`
+    : `<div style="width:56px;height:56px;border-radius:14px;background:#007405;color:#fff;font-size:22px;font-weight:700;text-align:center;line-height:56px;">YT</div>`;
+
+  return `<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#f4f9f4;font-family:'Avenir Next','Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f9f4;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+        <!-- Logo -->
+        <tr><td align="center" style="padding-bottom:28px;">
+          ${logoHtml}
+        </td></tr>
+
+        <!-- Card -->
+        <tr><td>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #dce8dc;">
+
+            <!-- Header -->
+            <tr><td style="background:linear-gradient(135deg,#007405 0%,#005a10 50%,#003f16 100%);padding:32px 36px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.8);font-weight:600;">Yıldız Tenis</td>
+                </tr>
+                <tr>
+                  <td style="font-size:22px;font-weight:600;color:#ffffff;padding-top:8px;line-height:1.3;">${title}</td>
+                </tr>
+              </table>
+            </td></tr>
+
+            <!-- Body -->
+            <tr><td style="padding:36px;font-size:15px;line-height:1.75;color:#1a2e1e;">
+              ${body}
+            </td></tr>
+
+            <!-- Footer -->
+            <tr><td style="border-top:1px solid #e8f0e8;padding:20px 36px;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#7a8f7e;line-height:1.5;">
+                © ${new Date().getFullYear()} Yıldız Tenis · Yıldız Teknik Üniversitesi, İstanbul
+              </p>
+            </td></tr>
+
+          </table>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+function codeBlock(code: string) {
   return `
-    <div style="margin:0;background:#f7fbf7;color:#102014;font-family:'Avenir Next',Arial,Helvetica,sans-serif;">
-      <div style="max-width:620px;margin:0 auto;padding:32px 20px;">
-        <div style="text-align:center;margin-bottom:24px;">
-          <img src="${baseUrl}/images/yildiz-tenis-logo.png" alt="Yıldız Tenis" width="64" height="64" style="border-radius:16px;border:1px solid #d8ead9;" />
-        </div>
-        <div style="border:1px solid #d8ead9;border-radius:16px;overflow:hidden;background:#ffffff;">
-          <div style="background:linear-gradient(135deg,#007405 0%,#003f16 100%);color:#ffffff;padding:28px 32px;">
-            <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:0.85;">Yıldız Tenis</div>
-            <h1 style="margin:10px 0 0;font-size:24px;line-height:1.3;font-weight:600;">${title}</h1>
-          </div>
-          <div style="padding:32px;font-size:15px;line-height:1.7;color:#1a2e1e;">
-            ${body}
-          </div>
-          <div style="border-top:1px solid #e8f0e8;padding:20px 32px;text-align:center;">
-            <p style="margin:0;font-size:12px;color:#6b7c6e;">© ${new Date().getFullYear()} Yıldız Tenis · Yıldız Teknik Üniversitesi, İstanbul</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <table cellpadding="0" cellspacing="0" style="margin:24px auto;background:#f0f8f0;border:2px dashed #007405;border-radius:12px;padding:0;">
+      <tr><td style="padding:16px 32px;text-align:center;">
+        <span style="font-size:32px;letter-spacing:0.22em;font-weight:700;color:#007405;font-family:'Courier New',monospace;">${code}</span>
+      </td></tr>
+    </table>
+  `;
+}
+
+function infoRow(label: string, value: string) {
+  return `
+    <tr>
+      <td style="padding:8px 0;color:#5a6e5e;font-size:13px;font-weight:600;width:120px;vertical-align:top;">${label}</td>
+      <td style="padding:8px 0;color:#1a2e1e;font-size:14px;">${value}</td>
+    </tr>
   `;
 }
 
 async function sendMail(to: string, subject: string, html: string) {
   if (smtpTransport) {
-    const response = await smtpTransport.sendMail({
-      from,
-      to,
-      subject,
-      html
-    });
-
+    const response = await smtpTransport.sendMail({ from, to, subject, html });
     return { id: response.messageId, skipped: false };
   }
 
@@ -74,75 +120,89 @@ async function sendMail(to: string, subject: string, html: string) {
     return { id: null, skipped: true };
   }
 
-  const response = await resend.emails.send({
-    from,
-    to,
-    subject,
-    html
-  });
-
+  const response = await resend.emails.send({ from, to, subject, html });
   if (response.error) {
     throw new Error(response.error.message);
   }
-
   return { id: response.data?.id ?? null, skipped: false };
 }
 
 export async function sendApplicationReceivedEmail(payload: WorkshopEmailPayload) {
-  const subject = "Ön başvurunuz alındı";
   const html = brandedTemplate(
-    "Ön başvurunuz alındı",
+    "Ön başvurun alındı",
     `
-      <p>Merhaba ${payload.firstName},</p>
-      <p><strong>${payload.workshopTitle}</strong> için ön başvurun başarıyla alındı.</p>
-      <p>Etkinlik tarihi: <strong>${payload.workshopDate}</strong></p>
-      <p>Kontenjan değerlendirmesi tamamlandığında seni yeniden bilgilendireceğiz.</p>
+      <p style="margin:0 0 16px;">Merhaba <strong>${payload.firstName}</strong>,</p>
+      <p style="margin:0 0 20px;"><strong>${payload.workshopTitle}</strong> için ön başvurun başarıyla alındı.</p>
+      <table cellpadding="0" cellspacing="0" style="background:#f8fbf8;border-radius:10px;padding:0;width:100%;margin:0 0 20px;">
+        <tr><td style="padding:16px 20px;">
+          <table cellpadding="0" cellspacing="0" width="100%">
+            ${infoRow("Workshop", payload.workshopTitle)}
+            ${infoRow("Tarih", payload.workshopDate)}
+          </table>
+        </td></tr>
+      </table>
+      <p style="margin:0;color:#5a6e5e;font-size:13px;">Kontenjan değerlendirmesi tamamlandığında seni yeniden bilgilendireceğiz.</p>
     `
   );
-
-  return sendMail(payload.to, subject, html);
+  return sendMail(payload.to, "Ön başvurunuz alındı", html);
 }
 
 export async function sendApplicationVerificationEmail(payload: VerificationEmailPayload) {
-  const subject = "Yıldız Tenis başvuru doğrulama kodu";
   const html = brandedTemplate(
     "Başvurunu doğrula",
     `
-      <p>Merhaba ${payload.firstName},</p>
-      <p><strong>${payload.workshopTitle}</strong> başvurunun sayılması için aşağıdaki kodu form ekranında doğrula.</p>
-      <p style="font-size:28px;letter-spacing:0.18em;font-weight:700;color:#007405;margin:24px 0;">${payload.code}</p>
-      <p>Bu kod 15 dakika boyunca geçerlidir.</p>
+      <p style="margin:0 0 16px;">Merhaba <strong>${payload.firstName}</strong>,</p>
+      <p style="margin:0 0 8px;"><strong>${payload.workshopTitle}</strong> başvurunun sayılması için aşağıdaki kodu form ekranında gir:</p>
+      ${codeBlock(payload.code)}
+      <p style="margin:0;color:#5a6e5e;font-size:13px;text-align:center;">Bu kod <strong>15 dakika</strong> boyunca geçerlidir.</p>
     `
   );
-
-  return sendMail(payload.to, subject, html);
+  return sendMail(payload.to, "Yıldız Tenis doğrulama kodu", html);
 }
 
 export async function sendApplicationAcceptedEmail(payload: WorkshopEmailPayload) {
-  const subject = "Workshop asil listesine kabul edildiniz";
-  const html = brandedTemplate(
-    "Workshop'a kabul edildiniz",
+  const whatsappBlock = payload.whatsappLink
+    ? `
+      <table cellpadding="0" cellspacing="0" style="background:#dcf8c6;border-radius:10px;width:100%;margin:20px 0;">
+        <tr><td style="padding:16px 20px;">
+          <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#1a2e1e;">📱 WhatsApp Grubuna Katıl</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#5a6e5e;">Workshop iletişimi için WhatsApp grubuna katılmayı unutma:</p>
+          <a href="${payload.whatsappLink}" style="display:inline-block;background:#25D366;color:#ffffff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;">WhatsApp Grubuna Katıl</a>
+        </td></tr>
+      </table>
     `
-      <p>Merhaba ${payload.firstName},</p>
-      <p><strong>${payload.workshopTitle}</strong> asil listesine kabul edildin.</p>
-      <p>Etkinlik tarihi: <strong>${payload.workshopDate}</strong></p>
-      <p>Detaylar ve hazırlık bilgileri kısa süre içinde paylaşılacaktır.</p>
+    : "";
+
+  const html = brandedTemplate(
+    "Asil listeye kabul edildin! 🎾",
+    `
+      <p style="margin:0 0 16px;">Merhaba <strong>${payload.firstName}</strong>,</p>
+      <p style="margin:0 0 20px;">Tebrikler! <strong>${payload.workshopTitle}</strong> asil listesine kabul edildin.</p>
+      <table cellpadding="0" cellspacing="0" style="background:#f0f8f0;border-radius:10px;border-left:4px solid #007405;width:100%;margin:0 0 20px;">
+        <tr><td style="padding:16px 20px;">
+          <table cellpadding="0" cellspacing="0" width="100%">
+            ${infoRow("Workshop", payload.workshopTitle)}
+            ${infoRow("Tarih", payload.workshopDate)}
+            ${infoRow("Durum", '<span style="color:#007405;font-weight:700;">Asil Liste ✓</span>')}
+          </table>
+        </td></tr>
+      </table>
+      ${whatsappBlock}
+      <p style="margin:0;color:#5a6e5e;font-size:13px;">Detaylar ve hazırlık bilgileri kısa süre içinde paylaşılacak.</p>
     `
   );
-
-  return sendMail(payload.to, subject, html);
+  return sendMail(payload.to, "Workshop asil listesine kabul edildiniz", html);
 }
 
 export async function sendAdminLoginCodeEmail(payload: AdminLoginCodePayload) {
-  const subject = "Yıldız Tenis admin giriş kodu";
   const html = brandedTemplate(
     "Admin giriş kodu",
     `
-      <p>Yıldız Tenis admin paneline giriş için doğrulama kodunuz:</p>
-      <p style="font-size:28px;letter-spacing:0.18em;font-weight:700;color:#007405;margin:24px 0;">${payload.code}</p>
-      <p>Bu kod 10 dakika boyunca geçerlidir. Bu işlemi siz başlatmadıysanız şifrenizi değiştirin.</p>
+      <p style="margin:0 0 8px;">Yıldız Tenis admin paneline giriş için doğrulama kodun:</p>
+      ${codeBlock(payload.code)}
+      <p style="margin:0;color:#5a6e5e;font-size:13px;text-align:center;">Bu kod <strong>10 dakika</strong> boyunca geçerlidir.</p>
+      <p style="margin:16px 0 0;color:#8a6050;font-size:12px;">Bu işlemi sen başlatmadıysan şifreni hemen değiştir.</p>
     `
   );
-
-  return sendMail(payload.to, subject, html);
+  return sendMail(payload.to, "Yıldız Tenis admin giriş kodu", html);
 }

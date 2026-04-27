@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,8 +67,8 @@ export function AdminLoginForm() {
     <form action={submitLogin} className="mt-6 grid gap-4">
       {!codeSent ? (
         <>
-          <Input name="email" placeholder="Admin e-postası" required type="email" />
-          <Input name="password" placeholder="Şifre" required type="password" />
+          <Input name="email" placeholder="Admin e-postası" className="py-6" required type="email" />
+          <Input name="password" placeholder="Şifre" className="py-6" required type="password" />
         </>
       ) : (
         <>
@@ -84,7 +85,8 @@ export function AdminLoginForm() {
           />
         </>
       )}
-      <Button disabled={isSubmitting} type="submit">
+      <Button disabled={isSubmitting} className="py-6" type="submit">
+        {isSubmitting && <Loader2 size={16} className="animate-spin" />}
         {isSubmitting ? "Kontrol ediliyor..." : codeSent ? "Kodu Doğrula" : "Kodu E-postaya Gönder"}
       </Button>
       {codeSent && (

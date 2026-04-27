@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import Link from "next/link";
 import { PlusCircle, Download, ArrowUpRight } from "lucide-react";
+import { DuplicateWorkshopButton } from "@/components/admin/duplicate-workshop-button";
 
 import { prisma } from "@/lib/prisma";
 import { WORKSHOP_STATUS_LABEL, WORKSHOP_STATUS_VARIANT } from "@/lib/constants";
@@ -85,6 +86,7 @@ export default async function WorkshopsPage() {
                             Düzenle
                             <ArrowUpRight size={14} />
                           </Button>
+                          <DuplicateWorkshopButton workshopId={workshop.id} />
                           <Button variant="ghost" size="sm" render={<a href={`/api/admin/export?workshopId=${workshop.id}&scope=all&type=xlsx`} />}>
                             <Download size={14} />
                           </Button>

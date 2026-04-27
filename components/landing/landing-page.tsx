@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Camera, Mail, MapPin, Menu, Users, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ContactForm } from "@/components/forms/contact-form";
 
@@ -47,55 +47,72 @@ const dateFormatter = new Intl.DateTimeFormat("tr-TR", {
 });
 
 const navLinks = [
-  { href: "/", label: "Ana Sayfa" },
+  { href: "#hero", label: "Ana Sayfa" },
   { href: "#events", label: "Etkinlikler" },
   { href: "#contact", label: "İletişim" }
 ];
 
 export function LandingPage({ content, workshops, galleryImages, teamMembers }: LandingPageProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("#hero");
+
+  useEffect(() => {
+    const ids = navLinks.map(l => l.href.replace("#", ""));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(`#${entry.target.id}`);
+          }
+        }
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, []);
   const heroImage =
     galleryImages[0]?.imageUrl ??
     "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=1800&q=85";
 
   return (
     <main className="min-h-screen bg-white text-zinc-950">
-      <nav className="sticky top-0 z-30 bg-white/72 px-3 py-3 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-[24px] border border-emerald-950/10 bg-white/88 px-3 py-2 shadow-[0_18px_60px_rgba(0,60,20,0.12)] md:px-4">
+      <nav className="sticky top-0 z-30 bg-[#003f16]/70 px-3 py-3 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2 md:px-4">
           <Link className="group inline-flex min-w-0 items-center gap-3" href="/">
-            <span className="relative h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[18px] border border-emerald-950/10 bg-white shadow-[0_14px_34px_rgba(0,60,20,0.16)]">
-              <Image alt="Yıldız Tenis logosu" className="object-cover" fill priority src="/images/yildiz-tenis-logo.png" sizes="52px" />
+            <span className="relative h-[52px] w-[52px] shrink-0 overflow-hidden rounded-full">
+              <Image alt="Yıldız Tenis logosu" className="object-cover" fill priority src="/images/yildiz-tenis-logo-round.png" sizes="52px" />
             </span>
             <span className="leading-none">
-              <span className="font-display block text-xl font-semibold text-[#003f16] transition group-hover:text-[#007405] md:text-[1.7rem]">
+              <span className="font-display block text-xl font-semibold text-white transition group-hover:text-[#dff4df] md:text-[1.7rem]">
                 Yıldız Tenis
               </span>
-              <span className="hidden pt-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 md:block">
+              <span className="hidden pt-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/60 md:block">
                 Tenis platformu
               </span>
             </span>
           </Link>
-          <div className="hidden grid-cols-3 rounded-[18px] bg-[#f3faf3] p-1 text-center text-sm font-semibold text-zinc-700 ring-1 ring-emerald-950/8 md:grid">
-            {navLinks.map((link) =>
-              link.href === "#contact" ? (
-                <a className="rounded-[14px] bg-[#007405] px-5 py-2.5 text-white shadow-[0_10px_24px_rgba(0,116,5,0.22)] transition hover:bg-[#005d04]" href={link.href} key={link.href}>
-                  {link.label}
-                </a>
-              ) : link.href.startsWith("#") ? (
-                <a className="rounded-[14px] px-5 py-2.5 transition hover:bg-white hover:text-[#007405] hover:shadow-sm" href={link.href} key={link.href}>
+          <div className="hidden grid-cols-3 rounded-[18px] bg-white/10 p-1 text-center text-sm font-semibold text-white/90 ring-1 ring-white/15 md:grid">
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.href;
+              return link.href === "#contact" ? (
+                <a className={`rounded-[14px] px-5 py-2.5 transition ${isActive ? "bg-[#007405] text-white shadow-[0_10px_24px_rgba(0,116,5,0.22)]" : "bg-[#007405]/80 text-white hover:bg-[#007405]"}`} href={link.href} key={link.href}>
                   {link.label}
                 </a>
               ) : (
-                <Link className="rounded-[14px] px-5 py-2.5 transition hover:bg-white hover:text-[#007405] hover:shadow-sm" href={link.href} key={link.href}>
+                <a className={`rounded-[14px] px-5 py-2.5 transition ${isActive ? "bg-white/20 text-white shadow-sm" : "hover:bg-white/15 hover:text-white"}`} href={link.href} key={link.href}>
                   {link.label}
-                </Link>
-              )
-            )}
+                </a>
+              );
+            })}
           </div>
           <button
             aria-expanded={isMenuOpen}
             aria-label="Menüyü aç veya kapat"
-            className="grid h-11 w-11 place-items-center rounded-[16px] bg-[#f3faf3] text-[#003f16] ring-1 ring-emerald-950/8 md:hidden"
+            className="grid h-11 w-11 place-items-center rounded-[16px] bg-white/10 text-white ring-1 ring-white/15 md:hidden"
             onClick={() => setIsMenuOpen((value) => !value)}
             type="button"
           >
@@ -138,6 +155,7 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
       </nav>
 
       <section
+        id="hero"
         className="relative isolate flex min-h-[calc(100vh-65px)] overflow-hidden bg-[#0c1810] text-white"
         style={{
           backgroundImage: `linear-gradient(90deg, rgba(0, 42, 15, 0.9) 0%, rgba(0, 70, 24, 0.68) 42%, rgba(0, 0, 0, 0.12) 100%), url(${heroImage})`,
@@ -245,6 +263,13 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
             ))}
           </div>
         )}
+
+        <div className="mt-10 text-center">
+          <Link href="/events" className="inline-flex items-center gap-2 text-sm font-semibold text-[#007405] transition hover:underline">
+            Tüm etkinlikleri gör
+            <ArrowRight size={16} />
+          </Link>
+        </div>
       </section>
 
       <section className="bg-[#f4faf4] py-24">
@@ -315,14 +340,15 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
               className="group"
               key={member.id}
             >
-              <div>
-                <div
-                  className="aspect-[4/5] bg-cover bg-center transition duration-500 group-hover:scale-[1.015]"
-                  style={{
-                    backgroundImage: `url(${member.imageUrl ?? "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=400&q=80"})`
-                  }}
-                />
-                <h3 className="mt-5 text-2xl font-semibold">{member.name}</h3>
+              <div className="text-center">
+                <div className="mx-auto h-32 w-32 overflow-hidden rounded-full border-2 border-emerald-900/10 transition duration-500 group-hover:scale-105">
+                  <img
+                    alt={member.name}
+                    className="h-full w-full object-cover"
+                    src={member.imageUrl ?? "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=400&q=80"}
+                  />
+                </div>
+                <h3 className="mt-5 text-xl font-semibold">{member.name}</h3>
                 <p className="mt-1 text-sm font-semibold text-[#007405]">{member.role}</p>
                 <p className="mt-3 text-sm leading-6 text-zinc-600">{member.bio}</p>
               </div>
@@ -331,7 +357,7 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
         </div>
       </section>
 
-      <section id="contact" className="mx-auto grid max-w-6xl gap-10 px-5 py-24 md:grid-cols-[0.9fr_1.1fr]">
+      <section id="contact" className="mx-auto grid max-w-6xl gap-10 px-5 pt-32 pb-24 scroll-mt-24 md:grid-cols-[0.9fr_1.1fr]">
         <motion.div {...reveal}>
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#007405]">
             İletişim
@@ -347,54 +373,62 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
         </motion.div>
       </section>
 
-      <footer className="border-t border-emerald-900/10 bg-[#f9fcf9]">
-        <div className="mx-auto max-w-6xl px-5 py-16">
+      <footer className="bg-[#0c1810] text-white">
+        <div className="mx-auto max-w-6xl px-5 pt-20 pb-10">
           <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
             <div>
               <div className="flex items-center gap-3">
-                <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-emerald-950/10">
-                  <Image alt="Yıldız Tenis" className="object-cover" fill sizes="40px" src="/images/yildiz-tenis-logo.png" />
+                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full">
+                  <Image alt="Yıldız Tenis" className="object-cover" fill sizes="48px" src="/images/yildiz-tenis-logo-round.png" />
                 </span>
-                <span className="font-display text-xl font-semibold text-[#003f16]">Yıldız Tenis</span>
+                <span className="font-display text-xl font-semibold">Yıldız Tenis</span>
               </div>
-              <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-500">
+              <p className="mt-5 max-w-xs text-sm leading-7 text-white/50">
                 YTÜ merkezli tenis topluluğu. Öğrenciler, mezunlar ve partner okullar için workshop ve etkinlik platformu.
               </p>
             </div>
 
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Platform</h4>
-              <nav className="mt-4 grid gap-2.5 text-sm">
-                <a className="text-zinc-600 transition hover:text-[#007405]" href="#events">Etkinlikler</a>
-                <a className="text-zinc-600 transition hover:text-[#007405]" href="#contact">İletişim</a>
+              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">Platform</h4>
+              <nav className="mt-5 grid gap-3 text-sm">
+                <Link className="text-white/70 transition hover:text-white" href="/events">Etkinlikler</Link>
+                <a className="text-white/70 transition hover:text-white" href="#contact">İletişim</a>
               </nav>
             </div>
 
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Yasal</h4>
-              <nav className="mt-4 grid gap-2.5 text-sm">
-                <Link className="text-zinc-600 transition hover:text-[#007405]" href="/kvkk">KVKK Aydınlatma</Link>
-                <Link className="text-zinc-600 transition hover:text-[#007405]" href="/tos">Kullanım Koşulları</Link>
-                <Link className="text-zinc-600 transition hover:text-[#007405]" href="/privacy">Gizlilik Politikası</Link>
+              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">Yasal</h4>
+              <nav className="mt-5 grid gap-3 text-sm">
+                <Link className="text-white/70 transition hover:text-white" href="/kvkk">KVKK Aydınlatma</Link>
+                <Link className="text-white/70 transition hover:text-white" href="/tos">Kullanım Koşulları</Link>
+                <Link className="text-white/70 transition hover:text-white" href="/privacy">Gizlilik Politikası</Link>
               </nav>
             </div>
 
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">İletişim</h4>
-              <nav className="mt-4 grid gap-2.5 text-sm">
-                <a className="inline-flex items-center gap-2 text-zinc-600 transition hover:text-[#007405]" href="mailto:info@yildiztenis.com">
+              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">İletişim & Sosyal</h4>
+              <nav className="mt-5 grid gap-3 text-sm">
+                <a className="inline-flex items-center gap-2 text-white/70 transition hover:text-white" href="mailto:info@yildiztenis.com">
                   <Mail size={15} />
                   info@yildiztenis.com
                 </a>
-                <a className="inline-flex items-center gap-2 text-zinc-600 transition hover:text-[#007405]" href="https://instagram.com" rel="noreferrer" target="_blank">
+                <a className="inline-flex items-center gap-2 text-white/70 transition hover:text-white" href="https://www.instagram.com/ytutenis/" rel="noreferrer" target="_blank">
                   <Camera size={15} />
                   Instagram
+                </a>
+                <a className="inline-flex items-center gap-2 text-white/70 transition hover:text-white" href="https://www.tiktok.com/@ytutenis" rel="noreferrer" target="_blank">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.88-2.88 2.89 2.89 0 012.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.73a8.19 8.19 0 004.76 1.52V6.8a4.84 4.84 0 01-1-.11z"/></svg>
+                  TikTok
+                </a>
+                <a className="inline-flex items-center gap-2 text-white/70 transition hover:text-white" href="https://www.linkedin.com/company/yt%C3%BC-tenis/" rel="noreferrer" target="_blank">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                  LinkedIn
                 </a>
               </nav>
             </div>
           </div>
 
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-emerald-900/10 pt-8 text-xs text-zinc-400 md:flex-row">
+          <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-white/30 md:flex-row">
             <p>© {new Date().getFullYear()} Yıldız Tenis. Tüm hakları saklıdır.</p>
             <p>Yıldız Teknik Üniversitesi, İstanbul</p>
           </div>

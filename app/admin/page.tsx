@@ -25,8 +25,8 @@ export default async function AdminLoginPage() {
 
       <section className="relative z-10 w-full max-w-md">
         <div className="mb-8 flex flex-col items-center">
-          <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-emerald-950/10 shadow-lg">
-            <Image alt="Yıldız Tenis" className="object-cover" fill sizes="80px" src="/images/yildiz-tenis-logo.png" />
+          <div className="relative h-20 w-20 overflow-hidden rounded-full shadow-lg">
+            <Image alt="Yıldız Tenis" className="object-cover" fill sizes="80px" src="/images/yildiz-tenis-logo-round.png" />
           </div>
           <h2 className="font-display mt-4 text-2xl font-semibold text-[#003f16]">Yıldız Tenis</h2>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Operasyon Merkezi</p>

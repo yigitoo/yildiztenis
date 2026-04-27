@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -11,6 +12,16 @@ type WorkshopFormPageProps = {
     "workshop-slug": string;
   }>;
 };
+
+export async function generateMetadata({ params }: WorkshopFormPageProps): Promise<Metadata> {
+  const { "workshop-slug": slug } = await params;
+  const workshop = await prisma.workshop.findUnique({ where: { slug }, select: { title: true, topic: true } });
+  if (!workshop) return { title: "Workshop Bulunamadı" };
+  return {
+    title: `${workshop.title} — Ön Başvuru | Yıldız Tenis`,
+    description: workshop.topic,
+  };
+}
 
 export default async function WorkshopFormPage({ params }: WorkshopFormPageProps) {
   const { "workshop-slug": slug } = await params;
@@ -54,8 +65,8 @@ export default async function WorkshopFormPage({ params }: WorkshopFormPageProps
       <header className="border-b border-emerald-950/10 bg-white/88 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <Link className="inline-flex items-center gap-3" href="/">
-            <span className="relative h-11 w-11 overflow-hidden rounded-[14px] border border-emerald-950/10 bg-white shadow-sm">
-              <Image alt="Yıldız Tenis logosu" className="object-cover" fill priority sizes="44px" src="/images/yildiz-tenis-logo.png" />
+            <span className="relative h-11 w-11 overflow-hidden rounded-full">
+              <Image alt="Yıldız Tenis logosu" className="object-cover" fill priority sizes="44px" src="/images/yildiz-tenis-logo-round.png" />
             </span>
             <span>
               <span className="font-display block text-xl font-semibold text-[#003f16]">Yıldız Tenis</span>

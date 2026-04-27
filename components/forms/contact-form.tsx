@@ -1,6 +1,6 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -15,6 +15,7 @@ export function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
 
   async function submitContact(formData: FormData) {
+    if (state === "submitting") return;
     setState("submitting");
 
     const response = await fetch("/api/contact", {
@@ -40,13 +41,13 @@ export function ContactForm() {
 
   return (
     <form ref={formRef} action={submitContact} className="grid gap-4 rounded-xl border border-emerald-900/10 p-6">
-      <Input name="name" placeholder="Ad Soyad" required className="bg-white" />
-      <Input name="email" placeholder="E-posta" required type="email" className="bg-white" />
-      <Input name="subject" placeholder="Konu" required className="bg-white" />
-      <Textarea name="message" placeholder="Mesajın" required className="min-h-32 bg-white" />
-      <Button disabled={state === "submitting"} type="submit">
+      <Input name="name" placeholder="Ad Soyad" required className="bg-white py-5" />
+      <Input name="email" placeholder="E-posta" required type="email" className="bg-white py-5" />
+      <Input name="subject" placeholder="Konu" required className="bg-white py-5" />
+      <Textarea name="message" placeholder="Mesajın" required className="min-h-32 bg-white py-4" />
+      <Button disabled={state === "submitting"} className="py-5" type="submit">
+        {state === "submitting" ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
         {state === "submitting" ? "Gönderiliyor..." : "Gönder"}
-        <Send size={18} />
       </Button>
     </form>
   );

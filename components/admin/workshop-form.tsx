@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 import { saveWorkshop } from "@/app/admin/actions";
 import type { ActionResult } from "@/lib/action-result";
@@ -29,6 +30,7 @@ type WorkshopFormProps = {
     capacity: number;
     status: WorkshopStatus;
     isExternalOpen: boolean;
+    whatsappLink: string | null;
   };
 };
 
@@ -132,10 +134,17 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
         </div>
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="whatsappLink">WhatsApp Grup Linki</Label>
+        <Input id="whatsappLink" name="whatsappLink" defaultValue={workshop?.whatsappLink ?? ""} placeholder="https://chat.whatsapp.com/..." type="url" />
+        <p className="text-xs text-muted-foreground">Kabul edilen adaylara gönderilen mailde bu link paylaşılır. Başvuranlar göremez.</p>
+      </div>
+
       <Separator />
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button type="submit" disabled={pending}>
+          {pending && <Loader2 size={16} className="animate-spin" />}
           {pending ? "Kaydediliyor..." : workshop ? "Değişiklikleri Kaydet" : "Workshop Oluştur"}
         </Button>
         <Button variant="outline" render={<Link href="/admin/workshops" />}>

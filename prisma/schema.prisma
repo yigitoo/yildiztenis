@@ -121,6 +121,7 @@ model Workshop {
   status                WorkshopStatus     @default(DRAFT)
   isExternalOpen        Boolean            @default(true)
   imageUrl              String?
+  whatsappLink          String?
   formFields            FormField[]
   applications          Application[]
   emailLogs             EmailLog[]

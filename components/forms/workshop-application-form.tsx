@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, Mail, PartyPopper } from "lucide-react";
+import { CheckCircle2, Loader2, Mail, PartyPopper } from "lucide-react";
 
 import type { Prisma } from "@/generated/prisma/client";
 import { SKILL_LEVEL_LABEL } from "@/lib/constants";
@@ -158,6 +158,7 @@ export function WorkshopApplicationForm({ workshopSlug, fields }: WorkshopApplic
           ))}
         <Textarea className="min-h-28 rounded-xl border-zinc-200 bg-[#fbfdfb]" name="notes" placeholder="Eklemek istediğin notlar" />
         <Button type="submit" disabled={state === "submitting"} className="h-12 rounded-xl text-sm">
+          {state === "submitting" && <Loader2 size={16} className="animate-spin" />}
           {state === "submitting" ? "Başvuru gönderiliyor..." : "Başvuruyu Gönder"}
         </Button>
         {message && state === "error" && (
@@ -188,6 +189,7 @@ export function WorkshopApplicationForm({ workshopSlug, fields }: WorkshopApplic
             />
             {verifyError && <p className="text-center text-sm font-medium text-destructive">{verifyError}</p>}
             <Button type="submit" disabled={state === "submitting"} className="h-11">
+              {state === "submitting" && <Loader2 size={16} className="animate-spin" />}
               {state === "submitting" ? "Doğrulanıyor..." : "Başvuruyu Doğrula"}
             </Button>
           </form>
