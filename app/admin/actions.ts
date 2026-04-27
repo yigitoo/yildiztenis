@@ -25,7 +25,8 @@ const workshopSchema = z.object({
   capacity: z.coerce.number().int().min(1, "En az 1"),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
   isExternalOpen: z.coerce.boolean().default(true),
-  whatsappLink: z.string().url().optional().or(z.literal(""))
+  whatsappLink: z.string().url().optional().or(z.literal("")),
+  imageUrl: z.string().url().optional().or(z.literal(""))
 });
 
 async function assertAdmin() {
@@ -54,7 +55,8 @@ export async function saveWorkshop(
       capacity: formData.get("capacity"),
       status: formData.get("status"),
       isExternalOpen: formData.get("isExternalOpen") === "on",
-      whatsappLink: formData.get("whatsappLink")?.toString() || ""
+      whatsappLink: formData.get("whatsappLink")?.toString() || "",
+      imageUrl: formData.get("imageUrl")?.toString() || ""
     });
 
     if (!result.success) {
@@ -79,7 +81,8 @@ export async function saveWorkshop(
       capacity: parsed.capacity,
       status: parsed.status,
       isExternalOpen: parsed.isExternalOpen,
-      whatsappLink: parsed.whatsappLink || null
+      whatsappLink: parsed.whatsappLink || null,
+      imageUrl: parsed.imageUrl || null
     };
 
     const workshop = parsed.id

@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/yigitoo/yildiztenis#readme",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1037.0",
     "@base-ui/react": "^1.4.1",
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/adapter-pg": "^7.8.0",

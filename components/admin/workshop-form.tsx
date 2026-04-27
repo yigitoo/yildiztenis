@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { saveWorkshop } from "@/app/admin/actions";
@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { ImageUpload } from "@/components/admin/image-upload";
 
 type WorkshopFormProps = {
   workshop?: {
@@ -31,6 +32,7 @@ type WorkshopFormProps = {
     status: WorkshopStatus;
     isExternalOpen: boolean;
     whatsappLink: string | null;
+    imageUrl: string | null;
   };
 };
 
@@ -41,7 +43,14 @@ function toDatetimeLocal(value: Date | null) {
 }
 
 export function WorkshopForm({ workshop }: WorkshopFormProps) {
-  const [state, formAction, pending] = useActionState<ActionResult<{ id: string }> | null, FormData>(saveWorkshop, null);
+  const [imageUrl, setImageUrl] = useState(workshop?.imageUrl ?? "");
+  const [state, formAction, pending] = useActionState<ActionResult<{ id: string }> | null, FormData>(
+    async (prev, formData) => {
+      formData.set("imageUrl", imageUrl);
+      return saveWorkshop(prev, formData);
+    },
+    null
+  );
 
   useEffect(() => {
     if (!state) return;
@@ -80,6 +89,11 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
         <Label htmlFor="description">Açıklama</Label>
         <Textarea id="description" name="description" defaultValue={workshop?.description} placeholder="Etkinliğin kapsamını, hedef kitlesini ve hazırlık notlarını yazın." className="min-h-32" required />
         {fieldError("description")}
+      </div>
+
+      <div className="space-y-2">
+        <Label>Kapak Görseli</Label>
+        <ImageUpload value={imageUrl} onChange={setImageUrl} folder="workshops" />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

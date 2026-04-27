@@ -138,19 +138,19 @@ async function main() {
       {
         title: "Kort içi başlangıç çalışması",
         alt: "Tenis kortunda temel vuruş çalışması yapan katılımcılar",
-        imageUrl: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=900&q=80",
+        imageUrl: "https://cdn.yildiztenis.com/gallery/seed-1.jpg",
         sortOrder: 1
       },
       {
         title: "Servis tekniği oturumu",
         alt: "Servis tekniği üzerine çalışan tenis oyuncusu",
-        imageUrl: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=900&q=80",
+        imageUrl: "https://cdn.yildiztenis.com/gallery/seed-2.jpg",
         sortOrder: 2
       },
       {
         title: "Sosyal maç günü",
         alt: "Açık tenis kortunda sosyal maç günü",
-        imageUrl: "https://images.unsplash.com/photo-1542144582-1ba00456b5e3?auto=format&fit=crop&w=900&q=80",
+        imageUrl: "https://cdn.yildiztenis.com/gallery/seed-3.jpg",
         sortOrder: 3
       }
     ],
@@ -163,21 +163,21 @@ async function main() {
         name: "Ece Yıldırım",
         role: "Baş Eğitmen",
         bio: "Başlangıç ve orta seviye oyuncular için teknik gelişim programlarını yönetir.",
-        imageUrl: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=500&q=80",
+        imageUrl: "https://cdn.yildiztenis.com/team/seed-1.jpg",
         sortOrder: 1
       },
       {
         name: "Mert Kaya",
         role: "Program Koordinatörü",
         bio: "Workshop takvimi, kontenjan planlaması ve okul iş birliklerini koordine eder.",
-        imageUrl: "https://images.unsplash.com/photo-1531315630201-bb15abeb1653?auto=format&fit=crop&w=500&q=80",
+        imageUrl: "https://cdn.yildiztenis.com/team/seed-2.jpg",
         sortOrder: 2
       },
       {
         name: "Selin Arslan",
         role: "Topluluk Sorumlusu",
         bio: "Öğrenci, mezun ve partner okul katılımcıları arasındaki iletişimi yürütür.",
-        imageUrl: "https://images.unsplash.com/photo-1599586120429-48281b6f0ece?auto=format&fit=crop&w=500&q=80",
+        imageUrl: "https://cdn.yildiztenis.com/team/seed-3.jpg",
         sortOrder: 3
       }
     ],

@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ImageUpload } from "@/components/admin/image-upload";
 
 type GalleryImage = {
   id: string;
@@ -28,8 +29,20 @@ export function GalleryManager({ images: initial }: { images: GalleryImage[] }) 
   const [editImage, setEditImage] = useState<GalleryImage | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [imageUrl, setImageUrl] = useState("");
+
+  function openAdd() {
+    setImageUrl("");
+    setShowAdd(true);
+  }
+
+  function openEdit(img: GalleryImage) {
+    setImageUrl(img.imageUrl);
+    setEditImage(img);
+  }
 
   function handleSave(formData: FormData) {
+    formData.set("imageUrl", imageUrl);
     startTransition(async () => {
       const result = await saveGalleryImage(null, formData);
       if (result.success) {
@@ -75,7 +88,7 @@ export function GalleryManager({ images: initial }: { images: GalleryImage[] }) 
   return (
     <>
       <div className="mb-4 flex justify-end">
-        <Button onClick={() => setShowAdd(true)}>
+        <Button onClick={openAdd}>
           <Plus size={16} />
           Görsel Ekle
         </Button>
@@ -105,7 +118,7 @@ export function GalleryManager({ images: initial }: { images: GalleryImage[] }) 
                   </Badge>
                 </div>
                 <div className="mt-3 flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => setEditImage(img)}>Düzenle</Button>
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(img)}>Düzenle</Button>
                   <Button variant="ghost" size="sm" onClick={() => handleToggle(img.id)} disabled={pending}>
                     {img.isPublished ? <EyeOff size={14} /> : <Eye size={14} />}
                   </Button>
@@ -135,10 +148,10 @@ export function GalleryManager({ images: initial }: { images: GalleryImage[] }) 
               <Input id="alt" name="alt" defaultValue={formDefaults.alt} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="imageUrl">Görsel URL</Label>
-              <Input id="imageUrl" name="imageUrl" defaultValue={formDefaults.imageUrl} type="url" required />
+              <Label>Görsel</Label>
+              <ImageUpload value={imageUrl} onChange={setImageUrl} folder="gallery" />
             </div>
-            <Button type="submit" disabled={pending}>
+            <Button type="submit" disabled={pending || !imageUrl}>
               {pending && <Loader2 size={14} className="animate-spin" />}
               {editImage ? "Güncelle" : "Ekle"}
             </Button>

@@ -74,9 +74,7 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
     }
     return () => observer.disconnect();
   }, []);
-  const heroImage =
-    galleryImages[0]?.imageUrl ??
-    "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=1800&q=85";
+  const heroImage = galleryImages[0]?.imageUrl ?? "";
 
   return (
     <main className="min-h-screen bg-white text-zinc-950">
@@ -345,7 +343,7 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
                   <img
                     alt={member.name}
                     className="h-full w-full object-cover"
-                    src={member.imageUrl ?? "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=400&q=80"}
+                    src={member.imageUrl ?? ""}
                   />
                 </div>
                 <h3 className="mt-5 text-xl font-semibold">{member.name}</h3>

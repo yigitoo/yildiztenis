@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ImageUpload } from "@/components/admin/image-upload";
 
 type TeamMember = {
   id: string;
@@ -30,8 +31,20 @@ export function TeamManager({ members: initial }: { members: TeamMember[] }) {
   const [editMember, setEditMember] = useState<TeamMember | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [imageUrl, setImageUrl] = useState("");
+
+  function openAdd() {
+    setImageUrl("");
+    setShowAdd(true);
+  }
+
+  function openEdit(member: TeamMember) {
+    setImageUrl(member.imageUrl ?? "");
+    setEditMember(member);
+  }
 
   function handleSave(formData: FormData) {
+    formData.set("imageUrl", imageUrl);
     startTransition(async () => {
       const result = await saveTeamMember(null, formData);
       if (result.success) {
@@ -77,7 +90,7 @@ export function TeamManager({ members: initial }: { members: TeamMember[] }) {
   return (
     <>
       <div className="mb-4 flex justify-end">
-        <Button onClick={() => setShowAdd(true)}>
+        <Button onClick={openAdd}>
           <Plus size={16} />
           Üye Ekle
         </Button>
@@ -112,7 +125,7 @@ export function TeamManager({ members: initial }: { members: TeamMember[] }) {
                   </Badge>
                 </div>
                 <div className="mt-4 flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => setEditMember(member)}>Düzenle</Button>
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(member)}>Düzenle</Button>
                   <Button variant="ghost" size="sm" onClick={() => handleToggle(member.id)} disabled={pending}>
                     {member.isPublished ? <EyeOff size={14} /> : <Eye size={14} />}
                   </Button>
@@ -146,8 +159,8 @@ export function TeamManager({ members: initial }: { members: TeamMember[] }) {
               <Textarea id="bio" name="bio" defaultValue={formDefaults.bio} className="min-h-20" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="imageUrl">Fotoğraf URL</Label>
-              <Input id="imageUrl" name="imageUrl" defaultValue={formDefaults.imageUrl ?? ""} type="url" />
+              <Label>Fotoğraf</Label>
+              <ImageUpload value={imageUrl} onChange={setImageUrl} folder="team" />
             </div>
             <Button type="submit" disabled={pending}>
               {pending && <Loader2 size={14} className="animate-spin" />}
