@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { useEffect, useState, useCallback } from "react";
-import { Download, Loader2, CheckSquare, Square, MinusSquare } from "lucide-react";
+import { Download, Loader2, CheckSquare, Square, MinusSquare, History } from "lucide-react";
 import { toast } from "sonner";
 
 import { updateApplicationStatus } from "@/app/admin/actions";
@@ -17,6 +17,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ApplicationStatus, SkillLevel } from "@/generated/prisma/client";
 import { ApplicationDetailDialog } from "@/components/admin/application-detail-dialog";
+
+type Workshop = {
+  id: string;
+  title: string;
+  startsAt: string;
+};
+
+type PastEvent = {
+  workshopId: string;
+  title: string;
+  startsAt: string;
+};
 
 type Application = {
   id: string;
@@ -37,24 +49,42 @@ type Application = {
   acceptedAt: string | null;
   acceptanceEmailSentAt: string | null;
   workshop: { id: string; title: string };
+  pastEvents: PastEvent[];
 };
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [workshopFilter, setWorkshopFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchUpdating, setBatchUpdating] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/applications")
+  const fetchApplications = useCallback((wsId?: string) => {
+    setLoading(true);
+    const params = wsId && wsId !== "all" ? `?workshopId=${wsId}` : "";
+    fetch(`/api/admin/applications${params}`)
       .then(r => r.json())
-      .then(setApplications)
+      .then((data) => {
+        setWorkshops(data.workshops);
+        setApplications(data.applications);
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
+
+  function handleWorkshopFilterChange(wsId: string) {
+    setWorkshopFilter(wsId);
+    setSelectedIds(new Set());
+    fetchApplications(wsId);
+  }
 
   const filtered = applications.filter(app => {
     const matchesSearch = search === "" || `${app.firstName} ${app.lastName} ${app.email} ${app.school}`.toLowerCase().includes(search.toLowerCase());
@@ -127,11 +157,11 @@ export default function ApplicationsPage() {
         ]}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" render={<a href="/api/admin/export?scope=all&type=xlsx" />}>
+            <Button variant="outline" size="sm" render={<a href={`/api/admin/export?scope=all&type=xlsx${workshopFilter !== "all" ? `&workshopId=${workshopFilter}` : ""}`} />}>
               <Download size={14} />
               <span className="hidden sm:inline">Tüm</span> XLSX
             </Button>
-            <Button variant="outline" size="sm" render={<a href="/api/admin/export?scope=accepted&type=pdf" />}>
+            <Button variant="outline" size="sm" render={<a href={`/api/admin/export?scope=accepted&type=pdf${workshopFilter !== "all" ? `&workshopId=${workshopFilter}` : ""}`} />}>
               <Download size={14} />
               <span className="hidden sm:inline">Asil</span> PDF
             </Button>
@@ -148,7 +178,18 @@ export default function ApplicationsPage() {
               onChange={e => setSearch(e.target.value)}
               className="w-full sm:max-w-sm"
             />
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <Select value={workshopFilter} onValueChange={(v) => handleWorkshopFilterChange(v ?? "all")}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Etkinlik filtrele" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Etkinlikler</SelectItem>
+                  {workshops.map(ws => (
+                    <SelectItem key={ws.id} value={ws.id}>{ws.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "all")}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Durum filtrele" />
@@ -205,6 +246,7 @@ export default function ApplicationsPage() {
                       <TableHead>Aday</TableHead>
                       <TableHead>Workshop</TableHead>
                       <TableHead>Okul</TableHead>
+                      <TableHead>Geçmiş</TableHead>
                       <TableHead className="hidden lg:table-cell">İletişim</TableHead>
                       <TableHead>Durum</TableHead>
                       <TableHead>Aksiyon</TableHead>
@@ -229,6 +271,16 @@ export default function ApplicationsPage() {
                           <span>{app.school}</span>
                           {app.department && <span className="block text-xs">{app.department}</span>}
                           {app.isExternal && <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">Harici</span>}
+                        </TableCell>
+                        <TableCell>
+                          {app.pastEvents.length > 0 ? (
+                            <div className="flex items-center gap-1.5" title={app.pastEvents.map(e => e.title).join(", ")}>
+                              <History size={14} className="text-emerald-600" />
+                              <span className="text-sm font-medium text-emerald-700">{app.pastEvents.length}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">İlk kez</span>
+                          )}
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
                           <p className="text-sm">{app.email}</p>
@@ -301,6 +353,12 @@ export default function ApplicationsPage() {
                         <span>{app.email}</span>
                         <span>{format(new Date(app.createdAt), "d MMM", { locale: tr })}</span>
                         {app.isExternal && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">Harici</span>}
+                        {app.pastEvents.length > 0 && (
+                          <span className="inline-flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
+                            <History size={10} />
+                            {app.pastEvents.length} önceki etkinlik
+                          </span>
+                        )}
                       </div>
                       <div className="mt-2" onClick={e => e.stopPropagation()}>
                         {updatingId === app.id ? (

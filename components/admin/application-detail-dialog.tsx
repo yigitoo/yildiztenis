@@ -9,6 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import type { ApplicationStatus, SkillLevel } from "@/generated/prisma/client";
 
+type PastEvent = {
+  workshopId: string;
+  title: string;
+  startsAt: string;
+};
+
 type ApplicationDetail = {
   id: string;
   firstName: string;
@@ -27,6 +33,7 @@ type ApplicationDetail = {
   verifiedAt: string | null;
   acceptedAt: string | null;
   workshop: { title: string };
+  pastEvents?: PastEvent[];
 };
 
 type Props = {
@@ -70,6 +77,25 @@ export function ApplicationDetailDialog({ application, onClose }: Props) {
               <DetailRow label="Kabul" value={format(new Date(application.acceptedAt), "d MMM yyyy, HH:mm", { locale: tr })} />
             )}
           </div>
+
+          {application.pastEvents && application.pastEvents.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Önceki Katılımlar ({application.pastEvents.length})</p>
+                <div className="mt-2 grid gap-1.5">
+                  {application.pastEvents.map(event => (
+                    <div key={event.workshopId} className="flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 text-sm">
+                      <span className="font-medium text-emerald-800">{event.title}</span>
+                      <span className="text-xs text-emerald-600">
+                        {format(new Date(event.startsAt), "MMM yyyy", { locale: tr })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           {application.notes && (
             <>
