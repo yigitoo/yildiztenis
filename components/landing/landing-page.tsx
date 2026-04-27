@@ -339,12 +339,18 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
               key={member.id}
             >
               <div className="text-center">
-                <div className="mx-auto h-32 w-32 overflow-hidden rounded-full border-2 border-emerald-900/10 transition duration-500 group-hover:scale-105">
-                  <img
-                    alt={member.name}
-                    className="h-full w-full object-cover"
-                    src={member.imageUrl ?? ""}
-                  />
+                <div className="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-emerald-900/10 bg-emerald-50 transition duration-500 group-hover:scale-105">
+                  {member.imageUrl ? (
+                    <img
+                      alt={member.name}
+                      className="h-full w-full object-cover"
+                      src={member.imageUrl}
+                    />
+                  ) : (
+                    <span className="text-3xl font-bold text-emerald-800/40">
+                      {member.name.split(" ").map(n => n[0]).join("")}
+                    </span>
+                  )}
                 </div>
                 <h3 className="mt-5 text-xl font-semibold">{member.name}</h3>
                 <p className="mt-1 text-sm font-semibold text-[#007405]">{member.role}</p>
