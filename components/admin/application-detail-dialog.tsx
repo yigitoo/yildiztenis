@@ -39,7 +39,7 @@ export function ApplicationDetailDialog({ application, onClose }: Props) {
 
   return (
     <Dialog open={!!application} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{application.firstName} {application.lastName}</DialogTitle>
         </DialogHeader>

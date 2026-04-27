@@ -51,13 +51,13 @@ export default async function DashboardPage() {
         description="Workshop, başvuru ve iletişim süreçlerini tek yerden yönetin."
         actions={
           <div className="flex gap-2">
-            <Button render={<Link href="/admin/workshops/new" />}>
-              <PlusCircle size={16} />
-              Yeni Workshop
+            <Button render={<Link href="/admin/workshops/new" />} size="sm">
+              <PlusCircle size={14} />
+              <span className="hidden sm:inline">Yeni</span> Workshop
             </Button>
-            <Button variant="outline" render={<a href="/api/admin/export?scope=all&type=xlsx" />}>
-              <Download size={16} />
-              Export XLSX
+            <Button variant="outline" size="sm" render={<a href="/api/admin/export?scope=all&type=xlsx" />}>
+              <Download size={14} />
+              <span className="hidden sm:inline">Export</span> XLSX
             </Button>
           </div>
         }
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
         <MetricCard title="Okunmamış Mesaj" value={unreadMessages.toString()} icon={<Mail size={20} />} />
       </section>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Son Başvurular</CardTitle>
@@ -87,22 +87,22 @@ export default async function DashboardPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Aday</TableHead>
-                    <TableHead>Workshop</TableHead>
+                    <TableHead className="hidden sm:table-cell">Workshop</TableHead>
                     <TableHead>Durum</TableHead>
-                    <TableHead>Tarih</TableHead>
+                    <TableHead className="hidden sm:table-cell">Tarih</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {applications.map((app) => (
                     <TableRow key={app.id}>
                       <TableCell className="font-medium">{app.firstName} {app.lastName}</TableCell>
-                      <TableCell className="text-muted-foreground">{app.workshop.title}</TableCell>
+                      <TableCell className="hidden text-muted-foreground sm:table-cell">{app.workshop.title}</TableCell>
                       <TableCell>
                         <Badge variant={APPLICATION_STATUS_VARIANT[app.status]}>
                           {APPLICATION_STATUS_LABEL[app.status]}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="hidden text-muted-foreground sm:table-cell">
                         {format(app.createdAt, "d MMM", { locale: tr })}
                       </TableCell>
                     </TableRow>

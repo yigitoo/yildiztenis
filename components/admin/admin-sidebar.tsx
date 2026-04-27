@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from "@/components/admin/theme-toggle";
 
 const navItems = [
   { href: "/admin", label: "Genel Bakış", icon: LayoutDashboard, exact: true },
@@ -25,10 +26,11 @@ const navItems = [
   { href: "/admin/settings", label: "Ayarlar", icon: Settings },
 ];
 
-function NavLink({ href, label, icon: Icon, active }: { href: string; label: string; icon: typeof LayoutDashboard; active: boolean }) {
+function NavLink({ href, label, icon: Icon, active, onClick }: { href: string; label: string; icon: typeof LayoutDashboard; active: boolean; onClick?: () => void }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
         active
@@ -42,11 +44,11 @@ function NavLink({ href, label, icon: Icon, active }: { href: string; label: str
   );
 }
 
-function SidebarContent({ pathname }: { pathname: string }) {
+function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="px-4 py-5">
-        <Link className="inline-flex items-center gap-3" href="/admin">
+        <Link className="inline-flex items-center gap-3" href="/admin" onClick={onNavigate}>
           <span className="relative h-10 w-10 overflow-hidden rounded-full">
             <Image alt="Yıldız Tenis" className="object-cover" fill sizes="40px" src="/images/yildiz-tenis-logo-round.png" />
           </span>
@@ -63,20 +65,21 @@ function SidebarContent({ pathname }: { pathname: string }) {
             const active = item.exact
               ? pathname === item.href
               : pathname.startsWith(item.href);
-            return <NavLink key={item.href} {...item} active={active} />;
+            return <NavLink key={item.href} {...item} active={active} onClick={onNavigate} />;
           })}
         </nav>
       </ScrollArea>
       <Separator />
-      <div className="p-4">
+      <div className="flex items-center gap-1 p-4">
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground"
+          className="flex-1 justify-start gap-3 text-muted-foreground"
           onClick={() => signOut({ callbackUrl: "/admin" })}
         >
           <LogOut size={18} />
           Çıkış Yap
         </Button>
+        <ThemeToggle />
       </div>
     </div>
   );
@@ -99,7 +102,7 @@ export function AdminSidebar() {
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
             <SheetTitle className="sr-only">Navigasyon</SheetTitle>
-            <SidebarContent pathname={pathname} />
+            <SidebarContent pathname={pathname} onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
         <Link className="inline-flex items-center gap-2" href="/admin">

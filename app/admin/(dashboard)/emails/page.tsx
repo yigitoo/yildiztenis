@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
@@ -60,75 +61,119 @@ export default async function EmailsPage({ searchParams }: EmailsPageProps) {
 
       <Card>
         <CardContent className="p-0">
-          <div className="flex items-center gap-2 border-b border-border p-4">
-            <a href="/admin/emails" className={`rounded-lg px-3 py-1.5 text-sm font-medium ${!type ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+          <div className="flex items-center gap-2 overflow-x-auto border-b border-border p-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <a href="/admin/emails" className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${!type ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
               Tümü
             </a>
             {Object.entries(EMAIL_TYPE_LABEL).map(([key, label]) => (
-              <a key={key} href={`/admin/emails?type=${key}`} className={`rounded-lg px-3 py-1.5 text-sm font-medium ${type === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+              <a key={key} href={`/admin/emails?type=${key}`} className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium ${type === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
                 {label}
               </a>
             ))}
-            <span className="ml-auto text-xs text-muted-foreground">{total} kayıt</span>
+            <span className="ml-auto shrink-0 text-xs text-muted-foreground">{total} kayıt</span>
           </div>
 
           {logs.length === 0 ? (
             <p className="py-16 text-center text-sm text-muted-foreground">E-posta kaydı bulunamadı.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tarih</TableHead>
-                  <TableHead>Tür</TableHead>
-                  <TableHead>Alıcı</TableHead>
-                  <TableHead>Konu</TableHead>
-                  <TableHead>Workshop</TableHead>
-                  <TableHead>Başvuran</TableHead>
-                  <TableHead>Durum</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop table */}
+              <div className="hidden lg:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tarih</TableHead>
+                      <TableHead>Tür</TableHead>
+                      <TableHead>Alıcı</TableHead>
+                      <TableHead>Konu</TableHead>
+                      <TableHead>Workshop</TableHead>
+                      <TableHead>Başvuran</TableHead>
+                      <TableHead>Durum</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {logs.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">
+                          {format(log.createdAt, "d MMM yyyy, HH:mm", { locale: tr })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={EMAIL_TYPE_VARIANT[log.type] ?? "outline"}>
+                            {EMAIL_TYPE_LABEL[log.type] ?? log.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">{log.recipient}</TableCell>
+                        <TableCell className="max-w-[200px] truncate text-muted-foreground">{log.subject}</TableCell>
+                        <TableCell className="text-muted-foreground">{log.workshop?.title ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {log.application ? `${log.application.firstName} ${log.application.lastName}` : "—"}
+                        </TableCell>
+                        <TableCell>
+                          {log.errorMessage ? (
+                            <Badge variant="destructive">Hata</Badge>
+                          ) : (
+                            <Badge variant="default">Gönderildi</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile card view */}
+              <div className="grid gap-0 lg:hidden">
                 {logs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="text-muted-foreground whitespace-nowrap">
-                      {format(log.createdAt, "d MMM yyyy, HH:mm", { locale: tr })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={EMAIL_TYPE_VARIANT[log.type] ?? "outline"}>
+                  <div key={log.id} className="border-b border-border p-4 last:border-b-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{log.recipient}</p>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">{log.subject}</p>
+                      </div>
+                      {log.errorMessage ? (
+                        <Badge variant="destructive" className="shrink-0">Hata</Badge>
+                      ) : (
+                        <Badge variant="default" className="shrink-0">Gönderildi</Badge>
+                      )}
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant={EMAIL_TYPE_VARIANT[log.type] ?? "outline"} className="text-[10px]">
                         {EMAIL_TYPE_LABEL[log.type] ?? log.type}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{log.recipient}</TableCell>
-                    <TableCell className="max-w-[200px] truncate text-muted-foreground">{log.subject}</TableCell>
-                    <TableCell className="text-muted-foreground">{log.workshop?.title ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {log.application ? `${log.application.firstName} ${log.application.lastName}` : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {log.errorMessage ? (
-                        <Badge variant="destructive">Hata</Badge>
-                      ) : (
-                        <Badge variant="default">Gönderildi</Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
+                      <span>{format(log.createdAt, "d MMM, HH:mm", { locale: tr })}</span>
+                      {log.workshop && <span>· {log.workshop.title}</span>}
+                      {log.application && <span>· {log.application.firstName} {log.application.lastName}</span>}
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 border-t border-border p-4">
-              {page > 1 && (
-                <a href={`/admin/emails?page=${page - 1}${type ? `&type=${type}` : ""}`} className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted">
-                  Önceki
+            <div className="flex items-center justify-center gap-1 border-t border-border p-4">
+              {page > 1 ? (
+                <a href={`/admin/emails?page=${page - 1}${type ? `&type=${type}` : ""}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-sm sm:font-medium">
+                  <ChevronLeft size={16} className="sm:hidden" />
+                  <span className="hidden sm:inline">Önceki</span>
                 </a>
+              ) : (
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground/30 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-sm">
+                  <ChevronLeft size={16} className="sm:hidden" />
+                  <span className="hidden sm:inline">Önceki</span>
+                </span>
               )}
-              <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
-              {page < totalPages && (
-                <a href={`/admin/emails?page=${page + 1}${type ? `&type=${type}` : ""}`} className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted">
-                  Sonraki
+              <span className="px-3 text-sm text-muted-foreground">{page} / {totalPages}</span>
+              {page < totalPages ? (
+                <a href={`/admin/emails?page=${page + 1}${type ? `&type=${type}` : ""}`} className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-sm sm:font-medium">
+                  <ChevronRight size={16} className="sm:hidden" />
+                  <span className="hidden sm:inline">Sonraki</span>
                 </a>
+              ) : (
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground/30 sm:h-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-sm">
+                  <ChevronRight size={16} className="sm:hidden" />
+                  <span className="hidden sm:inline">Sonraki</span>
+                </span>
               )}
             </div>
           )}
