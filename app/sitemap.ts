@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://yildiztenis.com";
+  const baseUrl = "https://yildiztenis.com";
 
   const workshops = await prisma.workshop.findMany({
     where: { status: "PUBLISHED" },

@@ -7,8 +7,9 @@ import { ArrowLeft, ArrowRight, Calendar, MapPin, Users, Clock } from "lucide-re
 import { prisma } from "@/lib/prisma";
 
 export const metadata = {
-  title: "Etkinlikler — Yıldız Tenis",
-  description: "Yıldız Tenis workshop ve etkinlikleri. Ön başvuru yapın."
+  title: "Etkinlikler",
+  description: "Yıldız Tenis workshop ve etkinlikleri. Her seviyeye uygun tenis programları ile ön başvuru yapın.",
+  alternates: { canonical: "https://yildiztenis.com/events" },
 };
 
 export default async function EventsPage() {

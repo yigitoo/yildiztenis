@@ -15,11 +15,13 @@ type WorkshopFormPageProps = {
 
 export async function generateMetadata({ params }: WorkshopFormPageProps): Promise<Metadata> {
   const { "workshop-slug": slug } = await params;
-  const workshop = await prisma.workshop.findUnique({ where: { slug }, select: { title: true, topic: true } });
+  const workshop = await prisma.workshop.findUnique({ where: { slug }, select: { title: true, topic: true, venue: true } });
   if (!workshop) return { title: "Workshop Bulunamadı" };
+  const description = `${workshop.topic} — ${workshop.venue}. Hemen ön başvuru yap.`;
   return {
-    title: `${workshop.title} — Ön Başvuru | Yıldız Tenis`,
-    description: workshop.topic,
+    title: `${workshop.title} — Ön Başvuru`,
+    description,
+    alternates: { canonical: `https://yildiztenis.com/form/${slug}` },
   };
 }
 
