@@ -28,8 +28,8 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-1.5 pl-6">
             <li><strong>Kimlik bilgileri:</strong> Ad, soyad</li>
             <li><strong>İletişim bilgileri:</strong> E-posta adresi, telefon numarası</li>
-            <li><strong>Eğitim bilgileri:</strong> Okul/üniversite adı</li>
-            <li><strong>Etkinlik bilgileri:</strong> Workshop tercihi, tenis seviyesi, başvuru durumu</li>
+            <li><strong>Eğitim bilgileri:</strong> Okul/üniversite adı, bölüm, sınıf</li>
+            <li><strong>Etkinlik bilgileri:</strong> Workshop tercihi, tenis seviyesi, başvuru durumu, harici başvuru bilgisi</li>
             <li><strong>İletişim formu:</strong> Konu, mesaj içeriği</li>
             <li><strong>Teknik veriler:</strong> IP adresi, tarayıcı bilgisi, çerez verileri</li>
           </ul>

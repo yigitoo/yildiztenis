@@ -5,3 +5,7 @@ export function isAllowedApplicationEmail(email: string) {
 
   return Boolean(domain && allowedApplicationEmailDomains.includes(domain));
 }
+
+export function isYtuEmail(email: string) {
+  return isAllowedApplicationEmail(email);
+}

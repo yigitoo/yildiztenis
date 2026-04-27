@@ -35,6 +35,9 @@ export async function GET(request: Request) {
     "E-posta": application.email,
     Telefon: application.phone,
     "Okul / Üniversite": application.school,
+    Bölüm: application.department ?? "",
+    Sınıf: application.classYear ?? "",
+    "Harici Başvuru": application.isExternal ? "Evet" : "Hayır",
     Seviye: SKILL_LEVEL_LABEL[application.level],
     Durum: APPLICATION_STATUS_LABEL[application.status],
     "Başvuru Tarihi": application.createdAt.toLocaleString("tr-TR")

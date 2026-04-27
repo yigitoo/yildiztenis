@@ -94,7 +94,7 @@ export default async function WorkshopFormPage({ params }: WorkshopFormPageProps
               <InfoLine icon={<CalendarDays size={18} />} label="Tarih" value={dateText} />
               <InfoLine icon={<MapPin size={18} />} label="Konum" value={workshop.venue} />
               <InfoLine icon={<Users size={18} />} label="Kontenjan" value={`${acceptedCount}/${workshop.capacity} asil liste · ${verifiedCount} doğrulanmış başvuru`} />
-              <InfoLine icon={<ShieldCheck size={18} />} label="E-posta doğrulaması" value="@std.yildiz.edu.tr ve @yildiz.edu.tr adresleri kabul edilir" />
+              <InfoLine icon={<ShieldCheck size={18} />} label="E-posta doğrulaması" value={workshop.isExternalOpen ? "YTÜ ve partner okul e-postaları kabul edilir" : "@std.yildiz.edu.tr ve @yildiz.edu.tr adresleri kabul edilir"} />
             </div>
           </div>
         </section>
@@ -111,7 +111,7 @@ export default async function WorkshopFormPage({ params }: WorkshopFormPageProps
               </p>
             </div>
           </div>
-          <WorkshopApplicationForm fields={workshop.formFields} workshopSlug={workshop.slug} />
+          <WorkshopApplicationForm fields={workshop.formFields} workshopSlug={workshop.slug} isExternalOpen={workshop.isExternalOpen} />
         </section>
       </div>
     </main>

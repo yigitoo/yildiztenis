@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 type WorkshopApplicationFormProps = {
   workshopSlug: string;
+  isExternalOpen: boolean;
   fields: Array<{
     label: string;
     name: string;
@@ -25,13 +26,14 @@ type WorkshopApplicationFormProps = {
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
-export function WorkshopApplicationForm({ workshopSlug, fields }: WorkshopApplicationFormProps) {
+export function WorkshopApplicationForm({ workshopSlug, isExternalOpen, fields }: WorkshopApplicationFormProps) {
   const [state, setState] = useState<FormState>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [isExternal, setIsExternal] = useState(false);
 
   async function submitApplication(formData: FormData) {
     if (state === "submitting") return;
@@ -45,6 +47,9 @@ export function WorkshopApplicationForm({ workshopSlug, fields }: WorkshopApplic
       email: formData.get("email"),
       phone: formData.get("phone"),
       school: formData.get("school"),
+      department: formData.get("department") || undefined,
+      classYear: formData.get("classYear") ? Number(formData.get("classYear")) : undefined,
+      isExternal,
       level: formData.get("level"),
       notes: formData.get("notes"),
       answers: Object.fromEntries(formData.entries())
@@ -134,6 +139,33 @@ export function WorkshopApplicationForm({ workshopSlug, fields }: WorkshopApplic
   return (
     <>
       <form action={submitApplication} className="mt-8 grid gap-4">
+        {isExternalOpen && (
+          <div className="flex gap-2 rounded-xl border border-zinc-200 bg-[#fbfdfb] p-1">
+            <button
+              type="button"
+              onClick={() => setIsExternal(false)}
+              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                !isExternal
+                  ? "bg-[#007405] text-white shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-700"
+              }`}
+            >
+              YTÜ Öğrenci / Mezun
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsExternal(true)}
+              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                isExternal
+                  ? "bg-[#007405] text-white shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-700"
+              }`}
+            >
+              Diğer Okul
+            </button>
+          </div>
+        )}
+
         <div className="grid gap-4 md:grid-cols-2">
           {fields
             .filter((field) => ["firstName", "lastName"].includes(field.name))
@@ -148,11 +180,49 @@ export function WorkshopApplicationForm({ workshopSlug, fields }: WorkshopApplic
               <InputField field={field} key={field.name} />
             ))}
         </div>
-        <p className="-mt-2 text-xs font-medium text-muted-foreground">
-          Başvurular yalnızca @std.yildiz.edu.tr veya @yildiz.edu.tr uzantılı e-posta adresleriyle alınır.
-        </p>
+        {!isExternal && (
+          <p className="-mt-2 text-xs font-medium text-muted-foreground">
+            YTÜ başvuruları yalnızca @std.yildiz.edu.tr veya @yildiz.edu.tr uzantılı e-posta adresleriyle alınır.
+          </p>
+        )}
+        {isExternal && (
+          <p className="-mt-2 text-xs font-medium text-muted-foreground">
+            Okulunuza ait e-posta adresinizi veya kişisel e-postanızı kullanabilirsiniz.
+          </p>
+        )}
+
         {fields
-          .filter((field) => !["firstName", "lastName", "email", "phone"].includes(field.name))
+          .filter((field) => field.name === "school")
+          .map((field) => (
+            <InputField field={field} key={field.name} />
+          ))}
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Input
+            className="h-11 rounded-xl border-zinc-200 bg-[#fbfdfb]"
+            name="department"
+            placeholder="Bölüm (ör. Bilgisayar Mühendisliği)"
+          />
+          <select
+            className="h-11 rounded-xl border border-zinc-200 bg-[#fbfdfb] px-4 py-3 text-sm outline-none transition focus:border-[#007405] focus:bg-white"
+            name="classYear"
+            defaultValue=""
+          >
+            <option value="">Sınıf seç</option>
+            <option value="0">Hazırlık</option>
+            <option value="1">1. Sınıf</option>
+            <option value="2">2. Sınıf</option>
+            <option value="3">3. Sınıf</option>
+            <option value="4">4. Sınıf</option>
+            <option value="5">5. Sınıf+</option>
+            <option value="6">Yüksek Lisans</option>
+            <option value="7">Doktora</option>
+            <option value="8">Mezun</option>
+          </select>
+        </div>
+
+        {fields
+          .filter((field) => !["firstName", "lastName", "email", "phone", "school"].includes(field.name))
           .map((field) => (
             <InputField field={field} key={field.name} />
           ))}

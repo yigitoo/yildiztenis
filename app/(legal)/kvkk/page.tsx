@@ -57,11 +57,11 @@ export default function KvkkPage() {
                 </tr>
                 <tr>
                   <td className="py-2.5 pr-4 font-medium text-zinc-700">Eğitim</td>
-                  <td className="py-2.5">Okul / üniversite adı</td>
+                  <td className="py-2.5">Okul / üniversite adı, bölüm, sınıf</td>
                 </tr>
                 <tr>
                   <td className="py-2.5 pr-4 font-medium text-zinc-700">Etkinlik</td>
-                  <td className="py-2.5">Tenis seviyesi, workshop tercihi, başvuru durumu</td>
+                  <td className="py-2.5">Tenis seviyesi, workshop tercihi, başvuru durumu, harici okul başvuru bilgisi</td>
                 </tr>
                 <tr>
                   <td className="py-2.5 pr-4 font-medium text-zinc-700">İşlem güvenliği</td>

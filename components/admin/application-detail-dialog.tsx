@@ -16,6 +16,9 @@ type ApplicationDetail = {
   email: string;
   phone: string;
   school: string;
+  department: string | null;
+  classYear: number | null;
+  isExternal: boolean;
   level: SkillLevel;
   notes: string | null;
   answers: Record<string, string> | null;
@@ -55,6 +58,9 @@ export function ApplicationDetailDialog({ application, onClose }: Props) {
             <DetailRow label="E-posta" value={application.email} />
             <DetailRow label="Telefon" value={application.phone} />
             <DetailRow label="Okul" value={application.school} />
+            {application.department && <DetailRow label="Bölüm" value={application.department} />}
+            {application.classYear != null && <DetailRow label="Sınıf" value={application.classYear === 0 ? "Hazırlık" : application.classYear >= 6 ? (application.classYear === 6 ? "Y.Lisans" : application.classYear === 7 ? "Doktora" : "Mezun") : `${application.classYear}. Sınıf`} />}
+            {application.isExternal && <DetailRow label="Kaynak" value="Harici Okul" />}
             <DetailRow label="Seviye" value={SKILL_LEVEL_LABEL[application.level]} />
             <DetailRow label="Başvuru" value={format(new Date(application.createdAt), "d MMM yyyy, HH:mm", { locale: tr })} />
             {application.verifiedAt && (

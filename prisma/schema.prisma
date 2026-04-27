@@ -194,6 +194,9 @@ model Application {
   email                   String
   phone                   String
   school                  String
+  department              String?
+  classYear               Int?
+  isExternal              Boolean           @default(false)
   level                   SkillLevel
   notes                   String?           @db.Text
   answers                 Json?

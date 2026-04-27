@@ -25,6 +25,9 @@ type Application = {
   email: string;
   phone: string;
   school: string;
+  department: string | null;
+  classYear: number | null;
+  isExternal: boolean;
   level: SkillLevel;
   notes: string | null;
   answers: Record<string, string> | null;
@@ -146,7 +149,11 @@ export default function ApplicationsPage() {
                         </p>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{app.workshop.title}</TableCell>
-                      <TableCell className="text-muted-foreground">{app.school}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <span>{app.school}</span>
+                        {app.department && <span className="block text-xs">{app.department}</span>}
+                        {app.isExternal && <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">Harici</span>}
+                      </TableCell>
                       <TableCell>
                         <p className="text-sm">{app.email}</p>
                         <p className="text-xs text-muted-foreground">{app.phone}</p>

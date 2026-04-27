@@ -34,6 +34,9 @@ export default async function WorkshopEditPage({ params }: WorkshopEditPageProps
           email: true,
           phone: true,
           school: true,
+          department: true,
+          classYear: true,
+          isExternal: true,
           status: true,
           createdAt: true,
         }
@@ -110,7 +113,7 @@ export default async function WorkshopEditPage({ params }: WorkshopEditPageProps
                       <TableHead>Aday</TableHead>
                       <TableHead>E-posta</TableHead>
                       <TableHead>Telefon</TableHead>
-                      <TableHead>Okul</TableHead>
+                      <TableHead>Okul / Bölüm</TableHead>
                       <TableHead>Durum</TableHead>
                       <TableHead>Tarih</TableHead>
                     </TableRow>
@@ -121,7 +124,11 @@ export default async function WorkshopEditPage({ params }: WorkshopEditPageProps
                         <TableCell className="font-medium">{app.firstName} {app.lastName}</TableCell>
                         <TableCell className="text-muted-foreground">{app.email}</TableCell>
                         <TableCell className="text-muted-foreground">{app.phone}</TableCell>
-                        <TableCell className="text-muted-foreground">{app.school}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          <span>{app.school}</span>
+                          {app.department && <span className="block text-xs">{app.department}</span>}
+                          {app.isExternal && <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">Harici</span>}
+                        </TableCell>
                         <TableCell>
                           <Badge variant={APPLICATION_STATUS_VARIANT[app.status]}>
                             {APPLICATION_STATUS_LABEL[app.status]}
