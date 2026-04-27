@@ -1,0 +1,229 @@
+"use client";
+
+import { useState } from "react";
+import { toast } from "sonner";
+import { CheckCircle2, Mail, PartyPopper } from "lucide-react";
+
+import type { Prisma } from "@/generated/prisma/client";
+import { SKILL_LEVEL_LABEL } from "@/lib/constants";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+type WorkshopApplicationFormProps = {
+  workshopSlug: string;
+  fields: Array<{
+    label: string;
+    name: string;
+    type: string;
+    required: boolean;
+    placeholder: string | null;
+    options: Prisma.JsonValue;
+  }>;
+};
+
+type FormState = "idle" | "submitting" | "success" | "error";
+
+export function WorkshopApplicationForm({ workshopSlug, fields }: WorkshopApplicationFormProps) {
+  const [state, setState] = useState<FormState>("idle");
+  const [message, setMessage] = useState<string | null>(null);
+  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const [showVerifyDialog, setShowVerifyDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+
+  async function submitApplication(formData: FormData) {
+    if (state === "submitting") return;
+    setState("submitting");
+    setMessage(null);
+
+    const body = {
+      workshopSlug,
+      firstName: formData.get("firstName"),
+      lastName: formData.get("lastName"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      school: formData.get("school"),
+      level: formData.get("level"),
+      notes: formData.get("notes"),
+      answers: Object.fromEntries(formData.entries())
+    };
+
+    const response = await fetch("/api/applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    if (response.ok) {
+      const payload = (await response.json()) as { id: string; message?: string };
+      setApplicationId(payload.id);
+      setState("idle");
+      setShowVerifyDialog(true);
+      return;
+    }
+
+    const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+    setState("error");
+    setMessage(payload?.message ?? "Başvuru gönderilemedi. Lütfen bilgileri kontrol edip tekrar dene.");
+    toast.error(payload?.message ?? "Başvuru gönderilemedi.");
+  }
+
+  async function verifyApplication(formData: FormData) {
+    if (!applicationId) return;
+    if (state === "submitting") return;
+    setState("submitting");
+    setVerifyError(null);
+
+    const response = await fetch("/api/applications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        applicationId,
+        code: formData.get("code")
+      })
+    });
+
+    if (response.ok) {
+      setState("success");
+      setShowVerifyDialog(false);
+      setShowSuccessDialog(true);
+      toast.success("Başvurun doğrulandı!");
+      return;
+    }
+
+    const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+    setState("error");
+    setVerifyError(payload?.message ?? "Doğrulama başarısız. Kodu kontrol edip tekrar dene.");
+  }
+
+  if (state === "success" || showSuccessDialog) {
+    return (
+      <>
+        <div className="mt-8 flex flex-col items-center rounded-2xl bg-accent p-10 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <PartyPopper size={28} />
+          </div>
+          <h3 className="font-display mt-5 text-2xl font-semibold">Başvurun Alındı!</h3>
+          <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+            Başvurun doğrulandı ve değerlendirme listesine alındı. Sonuçlar e-posta ile bildirilecek.
+          </p>
+        </div>
+
+        <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <DialogContent className="text-center sm:max-w-md">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <CheckCircle2 size={32} />
+            </div>
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl">Tebrikler!</DialogTitle>
+              <DialogDescription className="text-center">
+                Başvurun başarıyla doğrulandı ve değerlendirme listesine alındı. Kabul durumun e-posta ile bildirilecek.
+              </DialogDescription>
+            </DialogHeader>
+            <Button className="mt-2" onClick={() => setShowSuccessDialog(false)}>
+              Tamam
+            </Button>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <form action={submitApplication} className="mt-8 grid gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          {fields
+            .filter((field) => ["firstName", "lastName"].includes(field.name))
+            .map((field) => (
+              <InputField field={field} key={field.name} />
+            ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {fields
+            .filter((field) => ["email", "phone"].includes(field.name))
+            .map((field) => (
+              <InputField field={field} key={field.name} />
+            ))}
+        </div>
+        <p className="-mt-2 text-xs font-medium text-muted-foreground">
+          Başvurular yalnızca @std.yildiz.edu.tr veya @yildiz.edu.tr uzantılı e-posta adresleriyle alınır.
+        </p>
+        {fields
+          .filter((field) => !["firstName", "lastName", "email", "phone"].includes(field.name))
+          .map((field) => (
+            <InputField field={field} key={field.name} />
+          ))}
+        <Textarea className="min-h-28 rounded-xl border-zinc-200 bg-[#fbfdfb]" name="notes" placeholder="Eklemek istediğin notlar" />
+        <Button type="submit" disabled={state === "submitting"} className="h-12 rounded-xl text-sm">
+          {state === "submitting" ? "Başvuru gönderiliyor..." : "Başvuruyu Gönder"}
+        </Button>
+        {message && state === "error" && (
+          <p className="text-sm font-medium text-destructive">{message}</p>
+        )}
+      </form>
+
+      <Dialog open={showVerifyDialog} onOpenChange={setShowVerifyDialog}>
+        <DialogContent className="sm:max-w-md">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Mail size={28} />
+          </div>
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl">E-posta Doğrulama</DialogTitle>
+            <DialogDescription className="text-center">
+              E-posta adresine 6 haneli doğrulama kodu gönderdik. Kodu girerek başvurunu onayla.
+            </DialogDescription>
+          </DialogHeader>
+          <form action={verifyApplication} className="grid gap-4">
+            <Input
+              inputMode="numeric"
+              maxLength={6}
+              name="code"
+              placeholder="000000"
+              required
+              className="h-14 text-center text-2xl font-semibold tracking-[0.28em]"
+              autoFocus
+            />
+            {verifyError && <p className="text-center text-sm font-medium text-destructive">{verifyError}</p>}
+            <Button type="submit" disabled={state === "submitting"} className="h-11">
+              {state === "submitting" ? "Doğrulanıyor..." : "Başvuruyu Doğrula"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function InputField({
+  field
+}: {
+  field: WorkshopApplicationFormProps["fields"][number];
+}) {
+  if (field.name === "level") {
+    return (
+      <select className="h-11 rounded-xl border border-zinc-200 bg-[#fbfdfb] px-4 py-3 outline-none transition focus:border-[#007405] focus:bg-white" name="level" required={field.required} defaultValue="">
+        <option disabled value="">
+          Seviye seç
+        </option>
+        {Object.entries(SKILL_LEVEL_LABEL).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
+  return (
+    <Input
+      className="h-11 rounded-xl border-zinc-200 bg-[#fbfdfb]"
+      name={field.name}
+      placeholder={field.placeholder ?? field.label}
+      required={field.required}
+      type={field.type === "EMAIL" ? "email" : field.type === "PHONE" ? "tel" : "text"}
+    />
+  );
+}
