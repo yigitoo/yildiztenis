@@ -32,6 +32,7 @@ type WorkshopFormProps = {
     status: WorkshopStatus;
     isExternalOpen: boolean;
     isRegistrationOpen: boolean;
+    isVerificationRequired: boolean;
     whatsappLink: string | null;
     imageUrl: string | null;
     bannerUrl: string | null;
@@ -159,6 +160,10 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
           <div className="flex h-9 items-center gap-2">
             <Checkbox id="isRegistrationOpen" name="isRegistrationOpen" defaultChecked={workshop?.isRegistrationOpen ?? true} />
             <Label htmlFor="isRegistrationOpen" className="text-sm font-normal">Ön başvurular açık</Label>
+          </div>
+          <div className="flex h-9 items-center gap-2">
+            <Checkbox id="isVerificationRequired" name="isVerificationRequired" defaultChecked={workshop?.isVerificationRequired ?? true} />
+            <Label htmlFor="isVerificationRequired" className="text-sm font-normal">E-posta doğrulaması zorunlu</Label>
           </div>
           <div className="flex h-9 items-center gap-2">
             <Checkbox id="isExternalOpen" name="isExternalOpen" defaultChecked={workshop?.isExternalOpen ?? true} />

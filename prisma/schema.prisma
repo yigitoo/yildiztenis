@@ -121,6 +121,7 @@ model Workshop {
   status                WorkshopStatus     @default(DRAFT)
   isExternalOpen        Boolean            @default(true)
   isRegistrationOpen    Boolean            @default(true)
+  isVerificationRequired Boolean           @default(true)
   imageUrl              String?
   bannerUrl             String?
   whatsappLink          String?

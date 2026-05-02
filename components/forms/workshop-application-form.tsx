@@ -62,10 +62,16 @@ export function WorkshopApplicationForm({ workshopSlug, isExternalOpen, fields }
     });
 
     if (response.ok) {
-      const payload = (await response.json()) as { id: string; message?: string };
-      setApplicationId(payload.id);
-      setState("idle");
-      setShowVerifyDialog(true);
+      const payload = (await response.json()) as { id: string; requiresVerification: boolean; message?: string };
+      if (payload.requiresVerification) {
+        setApplicationId(payload.id);
+        setState("idle");
+        setShowVerifyDialog(true);
+      } else {
+        setState("success");
+        setShowSuccessDialog(true);
+        toast.success("Başvurun alındı!");
+      }
       return;
     }
 
@@ -110,7 +116,7 @@ export function WorkshopApplicationForm({ workshopSlug, isExternalOpen, fields }
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <PartyPopper size={28} />
           </div>
-          <h3 className="font-display mt-5 text-2xl font-semibold">Başvurun Alındı!</h3>
+          <h3 className="font-display text-white mt-5 text-2xl font-semibold">Başvurun Alındı!</h3>
           <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
             Başvurun doğrulandı ve değerlendirme listesine alındı. Sonuçlar e-posta ile bildirilecek.
           </p>

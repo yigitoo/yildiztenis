@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Calendar, MapPin, Users, Clock } from "lucide-react";
 
+import { ShareButtons } from "@/components/share-buttons";
 import { prisma } from "@/lib/prisma";
 
 export const metadata = {
@@ -119,21 +120,29 @@ export default async function EventsPage() {
                       )}
                     </div>
 
-                    <div className="mt-6 flex items-center gap-3">
-                      {workshop.isRegistrationOpen ? (
-                        <Link
-                          href={`/form/${workshop.slug}`}
-                          className="inline-flex items-center gap-2 rounded-lg bg-[#007405] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#005d04]"
-                        >
-                          Ön Başvuru Yap
-                          <ArrowRight size={16} />
-                        </Link>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-5 py-2.5 text-sm font-semibold text-zinc-400 cursor-not-allowed">
-                          Başvurular Kapalı
-                        </span>
-                      )}
-                      <span className="text-xs text-zinc-400">{workshop.topic}</span>
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {workshop.isRegistrationOpen ? (
+                          <Link
+                            href={`/form/${workshop.slug}`}
+                            className="inline-flex items-center gap-2 rounded-lg bg-[#007405] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#005d04]"
+                          >
+                            Ön Başvuru Yap
+                            <ArrowRight size={16} />
+                          </Link>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-5 py-2.5 text-sm font-semibold text-zinc-400 cursor-not-allowed">
+                            Başvurular Kapalı
+                          </span>
+                        )}
+                        <span className="hidden text-xs text-zinc-400 sm:inline">{workshop.topic}</span>
+                      </div>
+                      <ShareButtons
+                        url={`/form/${workshop.slug}`}
+                        title={workshop.title}
+                        description={workshop.topic}
+                        variant="compact"
+                      />
                     </div>
                   </div>
                 </article>

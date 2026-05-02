@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export const revalidate = 600;
 
 export default async function Home() {
-  const [contentRows, workshops, galleryImages, teamMembers] = await Promise.all([
+  const [contentRows, workshops, heroImage] = await Promise.all([
     prisma.siteContent.findMany(),
     prisma.workshop.findMany({
       where: { status: "PUBLISHED" },
@@ -17,15 +17,11 @@ export default async function Home() {
         }
       }
     }),
-    prisma.galleryImage.findMany({
+    prisma.galleryImage.findFirst({
       where: { isPublished: true },
       orderBy: { sortOrder: "asc" },
-      take: 6
+      select: { imageUrl: true }
     }),
-    prisma.teamMember.findMany({
-      where: { isPublished: true },
-      orderBy: { sortOrder: "asc" }
-    })
   ]);
 
   const content = Object.fromEntries(contentRows.map((row) => [row.key, row.value]));
@@ -41,8 +37,7 @@ export default async function Home() {
           content.aboutText ??
           "Yıldız Tenis, kort erişimini, eğitim programlarını ve sosyal turnuvaları düzenli hale getirmek için tasarlandı."
       }}
-      galleryImages={galleryImages}
-      teamMembers={teamMembers}
+      heroImageUrl={heroImage?.imageUrl}
       workshops={workshops.map((w) => ({
         title: w.title,
         slug: w.slug,

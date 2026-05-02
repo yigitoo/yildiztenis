@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const contactSchema = z.object({
   name: z.string().min(2),
@@ -11,6 +12,12 @@ const contactSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const rl = rateLimit(`contact:${ip}`, 5, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json({ message: "Çok fazla istek. Lütfen biraz bekleyin." }, { status: 429 });
+  }
+
   const payload = contactSchema.safeParse(await request.json());
 
   if (!payload.success) {

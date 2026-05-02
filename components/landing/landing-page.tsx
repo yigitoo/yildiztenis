@@ -20,19 +20,7 @@ type LandingPageProps = {
     isRegistrationOpen: boolean;
     acceptedCount: number;
   }>;
-  galleryImages: Array<{
-    id: string;
-    title: string;
-    alt: string;
-    imageUrl: string;
-  }>;
-  teamMembers: Array<{
-    id: string;
-    name: string;
-    role: string;
-    bio: string;
-    imageUrl: string | null;
-  }>;
+  heroImageUrl?: string;
 };
 
 const reveal = {
@@ -54,7 +42,7 @@ const navLinks = [
   { href: "#contact", label: "İletişim" }
 ];
 
-export function LandingPage({ content, workshops, galleryImages, teamMembers }: LandingPageProps) {
+export function LandingPage({ content, workshops, heroImageUrl }: LandingPageProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#hero");
 
@@ -76,7 +64,7 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
     }
     return () => observer.disconnect();
   }, []);
-  const heroImage = galleryImages[0]?.imageUrl ?? "";
+  const heroImage = heroImageUrl ?? "";
 
   return (
     <main className="min-h-screen bg-white text-zinc-950">
@@ -278,39 +266,6 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
         </div>
       </section>
 
-      <section className="bg-[#f4faf4] py-24">
-        <div className="mx-auto max-w-6xl px-5">
-        <motion.div {...reveal} className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#007405]">
-            Galeri
-          </p>
-          <h2 className="font-display mt-3 text-4xl font-semibold leading-tight md:text-6xl">
-            Korttan ve atölyelerden seçili anlar.
-          </h2>
-        </motion.div>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {galleryImages.map((image, index) => (
-            <motion.figure
-              {...reveal}
-              transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.04 }}
-              className={index === 0 ? "md:col-span-2" : ""}
-              key={image.id}
-            >
-              <div>
-                <div
-                  aria-label={image.alt}
-                  className="aspect-[4/3] bg-cover bg-center"
-                  role="img"
-                  style={{ backgroundImage: `url(${image.imageUrl})` }}
-                />
-                <figcaption className="pt-3 text-sm font-medium text-zinc-700">{image.title}</figcaption>
-              </div>
-            </motion.figure>
-          ))}
-        </div>
-        </div>
-      </section>
-
       <section className="border-y border-emerald-900/10 bg-white py-24">
         <div className="mx-auto max-w-6xl px-5">
           <motion.div {...reveal} className="grid gap-10 md:grid-cols-[0.8fr_1.2fr]">
@@ -326,46 +281,6 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
               {content.aboutText}
             </p>
           </motion.div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 py-24">
-        <motion.div {...reveal} className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#007405]">
-            Takım
-          </p>
-          <h2 className="font-display mt-3 text-4xl font-semibold leading-tight md:text-6xl">
-            Programları sahadan gelen ekip yönetir.
-          </h2>
-        </motion.div>
-        <div className="mt-12 grid gap-8 md:grid-cols-3">
-          {teamMembers.map((member, index) => (
-            <motion.article
-              {...reveal}
-              transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.05 }}
-              className="group"
-              key={member.id}
-            >
-              <div className="text-center">
-                <div className="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-emerald-900/10 bg-emerald-50 transition duration-500 group-hover:scale-105">
-                  {member.imageUrl ? (
-                    <img
-                      alt={member.name}
-                      className="h-full w-full object-cover"
-                      src={member.imageUrl}
-                    />
-                  ) : (
-                    <span className="text-3xl font-bold text-emerald-800/40">
-                      {member.name.split(" ").map(n => n[0]).join("")}
-                    </span>
-                  )}
-                </div>
-                <h3 className="mt-5 text-xl font-semibold">{member.name}</h3>
-                <p className="mt-1 text-sm font-semibold text-[#007405]">{member.role}</p>
-                <p className="mt-3 text-sm leading-6 text-zinc-600">{member.bio}</p>
-              </div>
-            </motion.article>
-          ))}
         </div>
       </section>
 
@@ -443,14 +358,14 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
           <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-white/30 md:flex-row">
             <p>© {new Date().getFullYear()} Yıldız Tenis. Tüm hakları saklıdır.</p>
             <p>
-              Developed by{' '}
-              <Link href='https://github.com/yigitoo' className="underline text-blue-100">
+              <Link href='https://www.linkedin.com/in/yigitgums/' className="underline text-blue-100">
                 Yiğit GÜMÜŞ
               </Link>
-              {' '}for{' '}
+              {' '}tarafından{' '}
               <Link href='https://instagram.com/ytutenis' className="underline text-blue-100">
                 Yıldız Tenis
-              </Link>.
+              </Link>
+              {' '}için geliştirildi.
               <br/>
               Yıldız Teknik Üniversitesi, İstanbul</p>
           </div>

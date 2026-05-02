@@ -137,7 +137,7 @@ export function GalleryManager({ images: initial }: { images: GalleryImage[] }) 
           <DialogHeader>
             <DialogTitle>{editImage ? "Görseli Düzenle" : "Yeni Görsel"}</DialogTitle>
           </DialogHeader>
-          <form action={handleSave} className="grid gap-4">
+          <form key={editImage?.id ?? "new"} action={handleSave} className="grid gap-4">
             {editImage && <input type="hidden" name="id" value={editImage.id} />}
             <div className="space-y-2">
               <Label htmlFor="title">Başlık</Label>

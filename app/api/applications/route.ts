@@ -7,6 +7,7 @@ import { hash, compare } from "bcryptjs";
 import { Prisma } from "@/generated/prisma/client";
 import { sendApplicationReceivedEmail, sendApplicationVerificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const applicationSchema = z.object({
   workshopSlug: z.string().min(1),
@@ -30,6 +31,12 @@ const verificationSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const rl = rateLimit(`app:post:${ip}`, 10, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json({ message: "Çok fazla istek. Lütfen biraz bekleyin." }, { status: 429 });
+  }
+
   const payload = applicationSchema.safeParse(await request.json());
 
   if (!payload.success) {
@@ -54,7 +61,58 @@ export async function POST(request: Request) {
   const isExternal = payload.data.isExternal;
 
   try {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    if (workshop.isVerificationRequired) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const application = await prisma.application.create({
+        data: {
+          workshopId: workshop.id,
+          firstName: payload.data.firstName,
+          lastName: payload.data.lastName,
+          email: payload.data.email,
+          phone: payload.data.phone,
+          school: payload.data.school,
+          studentNo: payload.data.studentNo || null,
+          department: payload.data.department || null,
+          classYear: payload.data.classYear ?? null,
+          isExternal,
+          level: payload.data.level,
+          notes: payload.data.notes,
+          answers: payload.data.answers as Prisma.InputJsonValue | undefined,
+          status: "UNVERIFIED",
+          verificationCodeHash: await hash(code, 10),
+          verificationExpiresAt: new Date(Date.now() + 15 * 60 * 1000)
+        }
+      });
+
+      const mailResult = await sendApplicationVerificationEmail({
+        to: application.email,
+        firstName: application.firstName,
+        workshopTitle: workshop.title,
+        workshopDate: format(workshop.startsAt, "d MMMM yyyy, HH:mm", { locale: tr }),
+        code
+      });
+
+      await prisma.emailLog.create({
+        data: {
+          type: "APPLICATION_VERIFICATION",
+          recipient: application.email,
+          subject: "Başvuru doğrulama kodu",
+          providerId: mailResult.id,
+          workshopId: workshop.id,
+          applicationId: application.id
+        }
+      });
+
+      return NextResponse.json(
+        {
+          id: application.id,
+          requiresVerification: true,
+          message: "Doğrulama kodu e-posta adresine gönderildi."
+        },
+        { status: 201 }
+      );
+    }
+
     const application = await prisma.application.create({
       data: {
         workshopId: workshop.id,
@@ -70,25 +128,24 @@ export async function POST(request: Request) {
         level: payload.data.level,
         notes: payload.data.notes,
         answers: payload.data.answers as Prisma.InputJsonValue | undefined,
-        status: "UNVERIFIED",
-        verificationCodeHash: await hash(code, 10),
-        verificationExpiresAt: new Date(Date.now() + 15 * 60 * 1000)
+        status: "PENDING",
+        verifiedAt: new Date(),
+        applicationEmailSentAt: new Date()
       }
     });
 
-    const mailResult = await sendApplicationVerificationEmail({
+    const mailResult = await sendApplicationReceivedEmail({
       to: application.email,
       firstName: application.firstName,
       workshopTitle: workshop.title,
-      workshopDate: format(workshop.startsAt, "d MMMM yyyy, HH:mm", { locale: tr }),
-      code
+      workshopDate: format(workshop.startsAt, "d MMMM yyyy, HH:mm", { locale: tr })
     });
 
     await prisma.emailLog.create({
       data: {
-        type: "APPLICATION_VERIFICATION",
+        type: "APPLICATION_RECEIVED",
         recipient: application.email,
-        subject: "Başvuru doğrulama kodu",
+        subject: "Ön başvurunuz alındı",
         providerId: mailResult.id,
         workshopId: workshop.id,
         applicationId: application.id
@@ -98,8 +155,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         id: application.id,
-        requiresVerification: true,
-        message: "Doğrulama kodu e-posta adresine gönderildi."
+        requiresVerification: false,
+        message: "Başvurun başarıyla alındı."
       },
       { status: 201 }
     );
@@ -113,6 +170,12 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const ip = getClientIp(request);
+  const rl = rateLimit(`app:patch:${ip}`, 15, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json({ message: "Çok fazla istek. Lütfen biraz bekleyin." }, { status: 429 });
+  }
+
   const payload = verificationSchema.safeParse(await request.json());
 
   if (!payload.success) {

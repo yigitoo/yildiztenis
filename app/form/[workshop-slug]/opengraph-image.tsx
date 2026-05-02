@@ -12,13 +12,13 @@ export default async function OgImage({ params }: { params: Promise<{ "workshop-
   const { "workshop-slug": slug } = await params;
   const workshop = await prisma.workshop.findUnique({
     where: { slug },
-    select: { title: true, topic: true, venue: true, bannerUrl: true, isRegistrationOpen: true },
+    select: { title: true, topic: true, venue: true, imageUrl: true, bannerUrl: true, isRegistrationOpen: true },
   });
 
   const title = workshop?.title ?? "Workshop";
   const topic = workshop?.topic ?? "";
   const venue = workshop?.venue ?? "";
-  const bannerUrl = workshop?.bannerUrl;
+  const bannerUrl = workshop?.bannerUrl ?? workshop?.imageUrl;
   const isOpen = workshop?.isRegistrationOpen ?? true;
 
   const logoData = await readFile(join(process.cwd(), "public/images/yildiz-tenis-logo-round.png"));

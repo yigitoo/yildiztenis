@@ -26,6 +26,7 @@ const workshopSchema = z.object({
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
   isExternalOpen: z.coerce.boolean().default(true),
   isRegistrationOpen: z.coerce.boolean().default(true),
+  isVerificationRequired: z.coerce.boolean().default(true),
   whatsappLink: z.string().url().optional().or(z.literal("")),
   imageUrl: z.string().url().optional().or(z.literal("")),
   bannerUrl: z.string().url().optional().or(z.literal(""))
@@ -58,6 +59,7 @@ export async function saveWorkshop(
       status: formData.get("status"),
       isExternalOpen: formData.get("isExternalOpen") === "on",
       isRegistrationOpen: formData.get("isRegistrationOpen") === "on",
+      isVerificationRequired: formData.get("isVerificationRequired") === "on",
       whatsappLink: formData.get("whatsappLink")?.toString() || "",
       imageUrl: formData.get("imageUrl")?.toString() || "",
       bannerUrl: formData.get("bannerUrl")?.toString() || ""
@@ -86,6 +88,7 @@ export async function saveWorkshop(
       status: parsed.status,
       isExternalOpen: parsed.isExternalOpen,
       isRegistrationOpen: parsed.isRegistrationOpen,
+      isVerificationRequired: parsed.isVerificationRequired,
       whatsappLink: parsed.whatsappLink || null,
       imageUrl: parsed.imageUrl || null,
       bannerUrl: parsed.bannerUrl || null
@@ -419,6 +422,7 @@ export async function duplicateWorkshop(workshopId: string): Promise<ActionResul
         status: "DRAFT",
         isExternalOpen: source.isExternalOpen,
         isRegistrationOpen: source.isRegistrationOpen,
+        isVerificationRequired: source.isVerificationRequired,
         bannerUrl: source.bannerUrl,
         whatsappLink: source.whatsappLink,
         formFields: {

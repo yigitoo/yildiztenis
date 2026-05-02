@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ApplicationStatus, SkillLevel } from "@/generated/prisma/client";
 import { ApplicationDetailDialog } from "@/components/admin/application-detail-dialog";
@@ -181,7 +181,9 @@ export default function ApplicationsPage() {
             <div className="flex flex-wrap items-center gap-3">
               <Select value={workshopFilter} onValueChange={(v) => handleWorkshopFilterChange(v ?? "all")}>
                 <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Etkinlik filtrele" />
+                  <span className="flex flex-1 text-left truncate">
+                    {workshopFilter === "all" ? "Tüm Etkinlikler" : workshops.find(w => w.id === workshopFilter)?.title ?? "Etkinlik filtrele"}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tüm Etkinlikler</SelectItem>
@@ -192,7 +194,9 @@ export default function ApplicationsPage() {
               </Select>
               <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? "all")}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Durum filtrele" />
+                  <span className="flex flex-1 text-left">
+                    {statusFilter === "all" ? "Tüm Durumlar" : APPLICATION_STATUS_LABEL[statusFilter as ApplicationStatus]}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tüm Durumlar</SelectItem>
@@ -305,7 +309,7 @@ export default function ApplicationsPage() {
                                 disabled={updatingId !== null}
                               >
                                 <SelectTrigger className="h-8 w-[140px]">
-                                  <SelectValue />
+                                  <span className="flex flex-1 text-left">{APPLICATION_STATUS_LABEL[app.status]}</span>
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="PENDING">Beklemede</SelectItem>
@@ -373,7 +377,7 @@ export default function ApplicationsPage() {
                             disabled={updatingId !== null}
                           >
                             <SelectTrigger className="h-8 w-full">
-                              <SelectValue />
+                              <span className="flex flex-1 text-left">{APPLICATION_STATUS_LABEL[app.status]}</span>
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="PENDING">Beklemede</SelectItem>

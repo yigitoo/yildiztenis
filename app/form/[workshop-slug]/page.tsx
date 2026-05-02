@@ -6,6 +6,7 @@ import { ArrowLeft, CalendarDays, CheckCircle2, MapPin, ShieldCheck, Users } fro
 
 import { WorkshopApplicationForm } from "@/components/forms/workshop-application-form";
 import { RegistrationClosedNotice } from "@/components/forms/registration-closed-notice";
+import { ShareButtons } from "@/components/share-buttons";
 import { prisma } from "@/lib/prisma";
 
 type WorkshopFormPageProps = {
@@ -23,6 +24,18 @@ export async function generateMetadata({ params }: WorkshopFormPageProps): Promi
     title: `${workshop.title} — Ön Başvuru`,
     description,
     alternates: { canonical: `https://yildiztenis.com/form/${slug}` },
+    openGraph: {
+      title: `${workshop.title} — Yıldız Tenis`,
+      description,
+      url: `https://yildiztenis.com/form/${slug}`,
+      siteName: "Yıldız Tenis",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${workshop.title} — Yıldız Tenis`,
+      description,
+    },
   };
 }
 
@@ -113,6 +126,14 @@ export default async function WorkshopFormPage({ params }: WorkshopFormPageProps
               <InfoLine icon={<MapPin size={18} />} label="Konum" value={workshop.venue} />
               <InfoLine icon={<Users size={18} />} label="Kontenjan" value={`${acceptedCount}/${workshop.capacity} asil liste · ${verifiedCount} doğrulanmış başvuru`} />
               <InfoLine icon={<ShieldCheck size={18} />} label="E-posta doğrulaması" value="Tüm e-posta adresleri kabul edilir" />
+            </div>
+
+            <div className="mt-8 border-t border-white/12 pt-5">
+              <ShareButtons
+                url={`/form/${workshop.slug}`}
+                title={workshop.title}
+                description={`${workshop.topic} — ${workshop.venue}`}
+              />
             </div>
           </div>
         </section>

@@ -18,6 +18,8 @@ export function createPrismaAdapter() {
 
   return new PrismaPg({
     connectionString: getDatabaseConnectionString(),
+    max: 3,
+    idleTimeoutMillis: 30_000,
     ssl: ca
       ? {
           ca,
