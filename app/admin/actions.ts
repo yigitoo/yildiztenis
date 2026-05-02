@@ -25,8 +25,10 @@ const workshopSchema = z.object({
   capacity: z.coerce.number().int().min(1, "En az 1"),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
   isExternalOpen: z.coerce.boolean().default(true),
+  isRegistrationOpen: z.coerce.boolean().default(true),
   whatsappLink: z.string().url().optional().or(z.literal("")),
-  imageUrl: z.string().url().optional().or(z.literal(""))
+  imageUrl: z.string().url().optional().or(z.literal("")),
+  bannerUrl: z.string().url().optional().or(z.literal(""))
 });
 
 async function assertAdmin() {
@@ -55,8 +57,10 @@ export async function saveWorkshop(
       capacity: formData.get("capacity"),
       status: formData.get("status"),
       isExternalOpen: formData.get("isExternalOpen") === "on",
+      isRegistrationOpen: formData.get("isRegistrationOpen") === "on",
       whatsappLink: formData.get("whatsappLink")?.toString() || "",
-      imageUrl: formData.get("imageUrl")?.toString() || ""
+      imageUrl: formData.get("imageUrl")?.toString() || "",
+      bannerUrl: formData.get("bannerUrl")?.toString() || ""
     });
 
     if (!result.success) {
@@ -81,8 +85,10 @@ export async function saveWorkshop(
       capacity: parsed.capacity,
       status: parsed.status,
       isExternalOpen: parsed.isExternalOpen,
+      isRegistrationOpen: parsed.isRegistrationOpen,
       whatsappLink: parsed.whatsappLink || null,
-      imageUrl: parsed.imageUrl || null
+      imageUrl: parsed.imageUrl || null,
+      bannerUrl: parsed.bannerUrl || null
     };
 
     const workshop = parsed.id
@@ -377,6 +383,20 @@ export async function toggleTeamMemberPublished(id: string): Promise<ActionResul
   }
 }
 
+export async function deleteWorkshop(workshopId: string): Promise<ActionResult> {
+  try {
+    const actorId = await assertAdmin();
+    await prisma.workshop.delete({ where: { id: workshopId } });
+    await prisma.auditLog.create({
+      data: { actorId, action: "workshop.delete", entity: "Workshop", entityId: workshopId }
+    });
+    revalidatePath("/admin");
+    return { success: true, data: undefined };
+  } catch {
+    return { success: false, error: "Workshop silinirken hata oluştu." };
+  }
+}
+
 export async function duplicateWorkshop(workshopId: string): Promise<ActionResult<{ id: string }>> {
   try {
     const actorId = await assertAdmin();
@@ -398,6 +418,8 @@ export async function duplicateWorkshop(workshopId: string): Promise<ActionResul
         capacity: source.capacity,
         status: "DRAFT",
         isExternalOpen: source.isExternalOpen,
+        isRegistrationOpen: source.isRegistrationOpen,
+        bannerUrl: source.bannerUrl,
         whatsappLink: source.whatsappLink,
         formFields: {
           create: source.formFields.map(f => ({

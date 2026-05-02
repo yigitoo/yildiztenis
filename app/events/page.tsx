@@ -61,7 +61,18 @@ export default async function EventsPage() {
 
               return (
                 <article key={workshop.id} className="group relative overflow-hidden rounded-2xl border border-emerald-900/10 bg-white transition hover:shadow-[0_20px_60px_rgba(0,60,20,0.1)]">
-                  <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#007405] to-[#003f16]" />
+                  {workshop.bannerUrl && (
+                    <div className="relative aspect-[21/9] w-full overflow-hidden">
+                      <Image
+                        src={workshop.bannerUrl}
+                        alt={workshop.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                    </div>
+                  )}
+                  {!workshop.bannerUrl && <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#007405] to-[#003f16]" />}
                   <div className="p-7">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -109,13 +120,19 @@ export default async function EventsPage() {
                     </div>
 
                     <div className="mt-6 flex items-center gap-3">
-                      <Link
-                        href={`/form/${workshop.slug}`}
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#007405] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#005d04]"
-                      >
-                        Ön Başvuru Yap
-                        <ArrowRight size={16} />
-                      </Link>
+                      {workshop.isRegistrationOpen ? (
+                        <Link
+                          href={`/form/${workshop.slug}`}
+                          className="inline-flex items-center gap-2 rounded-lg bg-[#007405] px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#005d04]"
+                        >
+                          Ön Başvuru Yap
+                          <ArrowRight size={16} />
+                        </Link>
+                      ) : (
+                        <span className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-5 py-2.5 text-sm font-semibold text-zinc-400 cursor-not-allowed">
+                          Başvurular Kapalı
+                        </span>
+                      )}
                       <span className="text-xs text-zinc-400">{workshop.topic}</span>
                     </div>
                   </div>

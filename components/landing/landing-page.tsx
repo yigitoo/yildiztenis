@@ -17,6 +17,8 @@ type LandingPageProps = {
     venue: string;
     startsAt: Date;
     capacity: number;
+    isRegistrationOpen: boolean;
+    acceptedCount: number;
   }>;
   galleryImages: Array<{
     id: string;
@@ -245,17 +247,23 @@ export function LandingPage({ content, workshops, galleryImages, teamMembers }: 
                       </span>
                       <span className="inline-flex items-center gap-2">
                         <Users size={16} />
-                        {workshop.capacity} kişilik kontenjan
+                        {workshop.acceptedCount}/{workshop.capacity} kayıtlı
                       </span>
                     </div>
                   </div>
-                  <Link
-                    className="inline-flex items-center justify-center gap-2 rounded-md bg-[#007405] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#005d04]"
-                    href={`/form/${workshop.slug}`}
-                  >
-                    Ön Başvuru
-                    <ArrowRight size={17} />
-                  </Link>
+                  {workshop.isRegistrationOpen ? (
+                    <Link
+                      className="inline-flex items-center justify-center gap-2 rounded-md bg-[#007405] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#005d04]"
+                      href={`/form/${workshop.slug}`}
+                    >
+                      Ön Başvuru
+                      <ArrowRight size={17} />
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center justify-center gap-2 rounded-md bg-zinc-100 px-5 py-3 text-sm font-semibold text-zinc-400 cursor-not-allowed">
+                      Başvurular Kapalı
+                    </span>
+                  )}
                 </div>
               </motion.article>
             ))}

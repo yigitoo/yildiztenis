@@ -34,6 +34,7 @@ export default async function WorkshopEditPage({ params }: WorkshopEditPageProps
           email: true,
           phone: true,
           school: true,
+          studentNo: true,
           department: true,
           classYear: true,
           isExternal: true,

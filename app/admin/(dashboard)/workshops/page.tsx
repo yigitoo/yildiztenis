@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import Link from "next/link";
 import { PlusCircle, Download, ArrowUpRight } from "lucide-react";
+import { DeleteWorkshopButton } from "@/components/admin/delete-workshop-button";
 import { DuplicateWorkshopButton } from "@/components/admin/duplicate-workshop-button";
 
 import { prisma } from "@/lib/prisma";
@@ -93,6 +94,7 @@ export default async function WorkshopsPage() {
                               <Button variant="ghost" size="sm" render={<a href={`/api/admin/export?workshopId=${workshop.id}&scope=all&type=xlsx`} />}>
                                 <Download size={14} />
                               </Button>
+                              <DeleteWorkshopButton workshopId={workshop.id} workshopTitle={workshop.title} />
                             </div>
                           </TableCell>
                         </TableRow>
@@ -131,6 +133,7 @@ export default async function WorkshopsPage() {
                         <Button variant="ghost" size="sm" render={<a href={`/api/admin/export?workshopId=${workshop.id}&scope=all&type=xlsx`} />}>
                           <Download size={14} />
                         </Button>
+                        <DeleteWorkshopButton workshopId={workshop.id} workshopTitle={workshop.title} />
                       </div>
                     </div>
                   );

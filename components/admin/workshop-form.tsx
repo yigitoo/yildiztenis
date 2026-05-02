@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { saveWorkshop } from "@/app/admin/actions";
@@ -31,8 +31,10 @@ type WorkshopFormProps = {
     capacity: number;
     status: WorkshopStatus;
     isExternalOpen: boolean;
+    isRegistrationOpen: boolean;
     whatsappLink: string | null;
     imageUrl: string | null;
+    bannerUrl: string | null;
   };
 };
 
@@ -44,9 +46,15 @@ function toDatetimeLocal(value: Date | null) {
 
 export function WorkshopForm({ workshop }: WorkshopFormProps) {
   const [imageUrl, setImageUrl] = useState(workshop?.imageUrl ?? "");
+  const [bannerUrl, setBannerUrl] = useState(workshop?.bannerUrl ?? "");
+  const [status, setStatus] = useState(workshop?.status ?? "PUBLISHED");
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formKey, setFormKey] = useState(0);
   const [state, formAction, pending] = useActionState<ActionResult<{ id: string }> | null, FormData>(
     async (prev, formData) => {
       formData.set("imageUrl", imageUrl);
+      formData.set("bannerUrl", bannerUrl);
+      formData.set("status", status);
       return saveWorkshop(prev, formData);
     },
     null
@@ -56,6 +64,7 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
     if (!state) return;
     if (state.success) {
       toast.success(workshop ? "Workshop güncellendi." : "Workshop oluşturuldu.");
+      if (!workshop) setFormKey((k) => k + 1);
     } else if (state.error && !state.fieldErrors) {
       toast.error(state.error);
     }
@@ -69,7 +78,7 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
   }
 
   return (
-    <form action={formAction} className="grid gap-5">
+    <form ref={formRef} key={formKey} action={formAction} className="grid gap-5">
       {workshop && <input name="id" type="hidden" value={workshop.id} />}
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -91,9 +100,16 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
         {fieldError("description")}
       </div>
 
-      <div className="space-y-2">
-        <Label>Kapak Görseli</Label>
-        <ImageUpload value={imageUrl} onChange={setImageUrl} folder="workshops" />
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Kapak Görseli</Label>
+          <ImageUpload value={imageUrl} onChange={setImageUrl} folder="workshops" />
+        </div>
+        <div className="space-y-2">
+          <Label>Banner Görseli</Label>
+          <ImageUpload value={bannerUrl} onChange={setBannerUrl} folder="workshops" />
+          <p className="text-xs text-muted-foreground">Etkinlik sayfası ve OG image&apos;da gösterilir. Yatay dikdörtgen önerilir.</p>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -128,7 +144,7 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="status">Yayın durumu</Label>
-          <Select name="status" defaultValue={workshop?.status ?? "PUBLISHED"}>
+          <Select value={status} onValueChange={(v) => setStatus(v as WorkshopStatus)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -139,8 +155,11 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label>Başvuru kapsamı</Label>
+        <div className="space-y-4">
+          <div className="flex h-9 items-center gap-2">
+            <Checkbox id="isRegistrationOpen" name="isRegistrationOpen" defaultChecked={workshop?.isRegistrationOpen ?? true} />
+            <Label htmlFor="isRegistrationOpen" className="text-sm font-normal">Ön başvurular açık</Label>
+          </div>
           <div className="flex h-9 items-center gap-2">
             <Checkbox id="isExternalOpen" name="isExternalOpen" defaultChecked={workshop?.isExternalOpen ?? true} />
             <Label htmlFor="isExternalOpen" className="text-sm font-normal">Partner okul başvurularına açık</Label>

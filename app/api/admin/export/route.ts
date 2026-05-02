@@ -35,6 +35,7 @@ export async function GET(request: Request) {
     "E-posta": application.email,
     Telefon: application.phone,
     "Okul / Üniversite": application.school,
+    "Öğrenci No": application.studentNo ?? "",
     Bölüm: application.department ?? "",
     Sınıf: application.classYear ?? "",
     "Harici Başvuru": application.isExternal ? "Evet" : "Hayır",

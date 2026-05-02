@@ -5,7 +5,6 @@ import { z } from "zod";
 import { hash, compare } from "bcryptjs";
 
 import { Prisma } from "@/generated/prisma/client";
-import { isAllowedApplicationEmail } from "@/lib/email-domains";
 import { sendApplicationReceivedEmail, sendApplicationVerificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
@@ -16,8 +15,9 @@ const applicationSchema = z.object({
   email: z.string().email(),
   phone: z.string().min(7),
   school: z.string().min(2),
+  studentNo: z.string().optional().or(z.literal("")),
   department: z.string().min(2).optional().or(z.literal("")),
-  classYear: z.coerce.number().int().min(1).max(8).optional(),
+  classYear: z.coerce.number().int().min(0).max(8).optional(),
   isExternal: z.boolean().default(false),
   level: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
   notes: z.string().optional(),
@@ -47,21 +47,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Etkinlik bulunamadı." }, { status: 404 });
   }
 
+  if (!workshop.isRegistrationOpen) {
+    return NextResponse.json({ message: "Bu etkinlik için başvurular kapalıdır." }, { status: 403 });
+  }
+
   const isExternal = payload.data.isExternal;
-
-  if (!isExternal && !isAllowedApplicationEmail(payload.data.email)) {
-    return NextResponse.json(
-      { message: "YTÜ başvuruları için @std.yildiz.edu.tr veya @yildiz.edu.tr uzantılı e-posta kullanılmalıdır." },
-      { status: 400 }
-    );
-  }
-
-  if (isExternal && !workshop.isExternalOpen) {
-    return NextResponse.json(
-      { message: "Bu etkinlik yalnızca YTÜ öğrenci ve mezunlarına açıktır." },
-      { status: 403 }
-    );
-  }
 
   try {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -73,6 +63,7 @@ export async function POST(request: Request) {
         email: payload.data.email,
         phone: payload.data.phone,
         school: payload.data.school,
+        studentNo: payload.data.studentNo || null,
         department: payload.data.department || null,
         classYear: payload.data.classYear ?? null,
         isExternal,

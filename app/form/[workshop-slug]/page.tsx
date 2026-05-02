@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, CheckCircle2, MapPin, ShieldCheck, Users } from "lucide-react";
 
 import { WorkshopApplicationForm } from "@/components/forms/workshop-application-form";
+import { RegistrationClosedNotice } from "@/components/forms/registration-closed-notice";
 import { prisma } from "@/lib/prisma";
 
 type WorkshopFormPageProps = {
@@ -82,11 +83,28 @@ export default async function WorkshopFormPage({ params }: WorkshopFormPageProps
         </div>
       </header>
 
+      {workshop.bannerUrl && (
+        <div className="mx-auto max-w-7xl px-5 pt-6">
+          <div className="relative aspect-[21/9] w-full overflow-hidden rounded-[28px] shadow-[0_24px_80px_rgba(0,63,22,0.12)]">
+            <Image
+              src={workshop.bannerUrl}
+              alt={workshop.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+              priority
+            />
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[0.92fr_1.08fr]">
         <section className="relative overflow-hidden rounded-[28px] bg-[#003f16] p-8 text-white shadow-[0_24px_80px_rgba(0,63,22,0.22)] md:p-10">
           <div className="absolute inset-0 court-grid opacity-35 mix-blend-screen" />
           <div className="relative z-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#dff4df]">Ön Başvuru</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#dff4df]">
+              {workshop.isRegistrationOpen ? "Ön Başvuru" : "Başvurular Kapalı"}
+            </p>
             <h1 className="font-display mt-5 text-5xl font-semibold leading-[0.95] md:text-7xl">{workshop.title}</h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/82">{workshop.description}</p>
 
@@ -94,25 +112,29 @@ export default async function WorkshopFormPage({ params }: WorkshopFormPageProps
               <InfoLine icon={<CalendarDays size={18} />} label="Tarih" value={dateText} />
               <InfoLine icon={<MapPin size={18} />} label="Konum" value={workshop.venue} />
               <InfoLine icon={<Users size={18} />} label="Kontenjan" value={`${acceptedCount}/${workshop.capacity} asil liste · ${verifiedCount} doğrulanmış başvuru`} />
-              <InfoLine icon={<ShieldCheck size={18} />} label="E-posta doğrulaması" value={workshop.isExternalOpen ? "YTÜ ve partner okul e-postaları kabul edilir" : "@std.yildiz.edu.tr ve @yildiz.edu.tr adresleri kabul edilir"} />
+              <InfoLine icon={<ShieldCheck size={18} />} label="E-posta doğrulaması" value="Tüm e-posta adresleri kabul edilir" />
             </div>
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-emerald-950/10 bg-white p-6 shadow-[0_24px_80px_rgba(0,60,20,0.08)] md:p-8">
-          <div className="flex items-start gap-3 border-b border-zinc-100 pb-6">
-            <span className="mt-1 grid h-9 w-9 place-items-center rounded-full bg-[#e8f6e8] text-[#007405]">
-              <CheckCircle2 size={19} />
-            </span>
-            <div>
-              <h2 className="text-2xl font-semibold">Başvuru bilgileri</h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">
-                Form gönderildikten sonra e-posta adresine 6 haneli doğrulama kodu gelir. Kod doğrulanmadan başvuru kontenjana dahil edilmez.
-              </p>
+        {workshop.isRegistrationOpen ? (
+          <section className="rounded-[28px] border border-emerald-950/10 bg-white p-6 shadow-[0_24px_80px_rgba(0,60,20,0.08)] md:p-8">
+            <div className="flex items-start gap-3 border-b border-zinc-100 pb-6">
+              <span className="mt-1 grid h-9 w-9 place-items-center rounded-full bg-[#e8f6e8] text-[#007405]">
+                <CheckCircle2 size={19} />
+              </span>
+              <div>
+                <h2 className="text-2xl font-semibold">Başvuru bilgileri</h2>
+                <p className="mt-2 text-sm leading-6 text-zinc-600">
+                  Form gönderildikten sonra e-posta adresine 6 haneli doğrulama kodu gelir. Kod doğrulanmadan başvuru kontenjana dahil edilmez.
+                </p>
+              </div>
             </div>
-          </div>
-          <WorkshopApplicationForm fields={workshop.formFields} workshopSlug={workshop.slug} isExternalOpen={workshop.isExternalOpen} />
-        </section>
+            <WorkshopApplicationForm fields={workshop.formFields} workshopSlug={workshop.slug} isExternalOpen={workshop.isExternalOpen} />
+          </section>
+        ) : (
+          <RegistrationClosedNotice />
+        )}
       </div>
     </main>
   );

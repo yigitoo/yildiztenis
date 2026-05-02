@@ -120,7 +120,9 @@ model Workshop {
   capacity              Int
   status                WorkshopStatus     @default(DRAFT)
   isExternalOpen        Boolean            @default(true)
+  isRegistrationOpen    Boolean            @default(true)
   imageUrl              String?
+  bannerUrl             String?
   whatsappLink          String?
   formFields            FormField[]
   applications          Application[]
@@ -194,6 +196,7 @@ model Application {
   email                   String
   phone                   String
   school                  String
+  studentNo               String?
   department              String?
   classYear               Int?
   isExternal              Boolean           @default(false)

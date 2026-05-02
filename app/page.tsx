@@ -1,13 +1,21 @@
 import { LandingPage } from "@/components/landing/landing-page";
 import { prisma } from "@/lib/prisma";
 
+export const revalidate = 600;
+
 export default async function Home() {
   const [contentRows, workshops, galleryImages, teamMembers] = await Promise.all([
     prisma.siteContent.findMany(),
     prisma.workshop.findMany({
       where: { status: "PUBLISHED" },
       orderBy: { startsAt: "asc" },
-      take: 6
+      take: 6,
+      include: {
+        applications: {
+          where: { status: { not: "UNVERIFIED" } },
+          select: { id: true, status: true }
+        }
+      }
     }),
     prisma.galleryImage.findMany({
       where: { isPublished: true },
@@ -35,7 +43,16 @@ export default async function Home() {
       }}
       galleryImages={galleryImages}
       teamMembers={teamMembers}
-      workshops={workshops}
+      workshops={workshops.map((w) => ({
+        title: w.title,
+        slug: w.slug,
+        topic: w.topic,
+        venue: w.venue,
+        startsAt: w.startsAt,
+        capacity: w.capacity,
+        isRegistrationOpen: w.isRegistrationOpen,
+        acceptedCount: w.applications.filter((a) => a.status === "ACCEPTED").length,
+      }))}
     />
   );
 }
