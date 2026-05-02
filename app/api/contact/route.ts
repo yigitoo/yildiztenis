@@ -18,7 +18,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Çok fazla istek. Lütfen biraz bekleyin." }, { status: 429 });
   }
 
-  const payload = contactSchema.safeParse(await request.json());
+  const body = await request.json();
+
+  if (body.website) {
+    return NextResponse.json({ id: "ok" }, { status: 201 });
+  }
+
+  const payload = contactSchema.safeParse(body);
 
   if (!payload.success) {
     return NextResponse.json({ message: "Mesaj bilgileri eksik veya hatalı." }, { status: 400 });

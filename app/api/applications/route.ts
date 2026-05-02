@@ -37,7 +37,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Çok fazla istek. Lütfen biraz bekleyin." }, { status: 429 });
   }
 
-  const payload = applicationSchema.safeParse(await request.json());
+  const body = await request.json();
+
+  if (body.website) {
+    return NextResponse.json({ message: "Başvuru alındı." }, { status: 201 });
+  }
+
+  const payload = applicationSchema.safeParse(body);
 
   if (!payload.success) {
     return NextResponse.json(

@@ -25,7 +25,8 @@ export function ContactForm() {
         name: formData.get("name"),
         email: formData.get("email"),
         subject: formData.get("subject"),
-        message: formData.get("message")
+        message: formData.get("message"),
+        website: formData.get("website") || undefined
       })
     });
 
@@ -41,6 +42,7 @@ export function ContactForm() {
 
   return (
     <form ref={formRef} action={submitContact} className="grid gap-4 rounded-xl border border-emerald-900/10 p-6">
+      <input type="text" name="website" autoComplete="off" tabIndex={-1} aria-hidden="true" className="absolute -left-[9999px] opacity-0 h-0 w-0" />
       <Input name="name" placeholder="Ad Soyad" required className="bg-white py-5" />
       <Input name="email" placeholder="E-posta" required type="email" className="bg-white py-5" />
       <Input name="subject" placeholder="Konu" required className="bg-white py-5" />

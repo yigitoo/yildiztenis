@@ -52,6 +52,7 @@ export function WorkshopApplicationForm({ workshopSlug, isExternalOpen, fields }
       isExternal: false,
       level: formData.get("level"),
       notes: formData.get("notes"),
+      website: formData.get("website") || undefined,
       answers: Object.fromEntries(formData.entries())
     };
 
@@ -145,6 +146,7 @@ export function WorkshopApplicationForm({ workshopSlug, isExternalOpen, fields }
   return (
     <>
       <form action={submitApplication} className="mt-8 grid gap-4">
+        <input type="text" name="website" autoComplete="off" tabIndex={-1} aria-hidden="true" className="absolute -left-[9999px] opacity-0 h-0 w-0" />
         <div className="grid gap-4 md:grid-cols-2">
           {fields
             .filter((field) => ["firstName", "lastName"].includes(field.name))
@@ -201,6 +203,7 @@ export function WorkshopApplicationForm({ workshopSlug, isExternalOpen, fields }
           .map((field) => (
             <InputField field={field} key={field.name} />
           ))}
+        <Textarea className="min-h-28 rounded-xl border-zinc-200 bg-[#fbfdfb]" name="funFact" placeholder="Kendin hakkında bir fun fact ver" required />
         <Textarea className="min-h-28 rounded-xl border-zinc-200 bg-[#fbfdfb]" name="notes" placeholder="Eklemek istediğin notlar" />
         <Button type="submit" disabled={state === "submitting"} className="h-12 rounded-xl text-sm">
           {state === "submitting" && <Loader2 size={16} className="animate-spin" />}
