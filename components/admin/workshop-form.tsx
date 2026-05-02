@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
@@ -185,7 +184,7 @@ export function WorkshopForm({ workshop }: WorkshopFormProps) {
           {pending && <Loader2 size={16} className="animate-spin" />}
           {pending ? "Kaydediliyor..." : workshop ? "Değişiklikleri Kaydet" : "Workshop Oluştur"}
         </Button>
-        <Button variant="outline" render={<Link href="/admin/workshops" />}>
+        <Button variant="outline" render={<a href="/admin/workshops" />}>
           Workshoplara dön
         </Button>
       </div>

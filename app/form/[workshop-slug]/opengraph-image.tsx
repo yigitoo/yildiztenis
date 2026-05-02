@@ -18,11 +18,25 @@ export default async function OgImage({ params }: { params: Promise<{ "workshop-
   const title = workshop?.title ?? "Workshop";
   const topic = workshop?.topic ?? "";
   const venue = workshop?.venue ?? "";
-  const bannerUrl = workshop?.bannerUrl ?? workshop?.imageUrl;
+  const bannerSrc = workshop?.bannerUrl ?? workshop?.imageUrl;
   const isOpen = workshop?.isRegistrationOpen ?? true;
 
   const logoData = await readFile(join(process.cwd(), "public/images/yildiz-tenis-logo-round.png"));
   const logoBase64 = `data:image/png;base64,${logoData.toString("base64")}`;
+
+  let bannerBase64: string | null = null;
+  if (bannerSrc) {
+    try {
+      const res = await fetch(bannerSrc);
+      if (res.ok) {
+        const buf = await res.arrayBuffer();
+        const contentType = res.headers.get("content-type") ?? "image/png";
+        bannerBase64 = `data:${contentType};base64,${Buffer.from(buf).toString("base64")}`;
+      }
+    } catch {
+      // banner fetch failed, skip
+    }
+  }
 
   return new ImageResponse(
     (
@@ -39,9 +53,9 @@ export default async function OgImage({ params }: { params: Promise<{ "workshop-
           position: "relative",
         }}
       >
-        {bannerUrl && (
+        {bannerBase64 && (
           <img
-            src={bannerUrl}
+            src={bannerBase64}
             style={{
               position: "absolute",
               top: 0,
@@ -98,8 +112,8 @@ export default async function OgImage({ params }: { params: Promise<{ "workshop-
                 color: "rgba(255,255,255,0.6)",
               }}
             >
-              {topic && <span>{topic}</span>}
-              {venue && <span>📍 {venue}</span>}
+              {topic && <span className="text-white">{topic}</span>}
+              {venue && <span className="text-white">📍 {venue}</span>}
             </div>
           </div>
         </div>

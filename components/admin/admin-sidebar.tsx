@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { LayoutDashboard, GraduationCap, Users, Mail, LogOut, Menu, ImageIcon, UsersRound, MailCheck, ScrollText, Settings } from "lucide-react";
@@ -28,7 +27,7 @@ const navItems = [
 
 function NavLink({ href, label, icon: Icon, active, onClick }: { href: string; label: string; icon: typeof LayoutDashboard; active: boolean; onClick?: () => void }) {
   return (
-    <Link
+    <a
       href={href}
       onClick={onClick}
       className={cn(
@@ -40,7 +39,7 @@ function NavLink({ href, label, icon: Icon, active, onClick }: { href: string; l
     >
       <Icon size={18} />
       {label}
-    </Link>
+    </a>
   );
 }
 
@@ -48,7 +47,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
   return (
     <div className="flex h-full flex-col">
       <div className="px-4 py-5">
-        <Link className="inline-flex items-center gap-3" href="/admin" onClick={onNavigate}>
+        <a className="inline-flex items-center gap-3" href="/admin" onClick={onNavigate}>
           <span className="relative h-10 w-10 overflow-hidden rounded-full">
             <Image alt="Yıldız Tenis" className="object-cover" fill sizes="40px" src="/images/yildiz-tenis-logo-round.png" />
           </span>
@@ -56,7 +55,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
             <span className="font-display block text-lg font-semibold text-foreground">Yıldız Tenis</span>
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Admin CRM</span>
           </span>
-        </Link>
+        </a>
       </div>
       <Separator />
       <ScrollArea className="flex-1 px-3 py-4">
@@ -105,12 +104,12 @@ export function AdminSidebar() {
             <SidebarContent pathname={pathname} onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
-        <Link className="inline-flex items-center gap-2" href="/admin">
+        <a className="inline-flex items-center gap-2" href="/admin">
           <span className="relative h-8 w-8 overflow-hidden rounded-full">
             <Image alt="Yıldız Tenis" className="object-cover" fill sizes="32px" src="/images/yildiz-tenis-logo-round.png" />
           </span>
           <span className="font-display text-base font-semibold">Yıldız Tenis</span>
-        </Link>
+        </a>
       </div>
     </>
   );

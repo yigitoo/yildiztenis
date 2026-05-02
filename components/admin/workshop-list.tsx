@@ -2,7 +2,6 @@
 
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 
 import { WORKSHOP_STATUS_LABEL, WORKSHOP_STATUS_VARIANT } from "@/lib/constants";
@@ -37,7 +36,7 @@ export function WorkshopList({ workshops }: { workshops: WorkshopData[] }) {
           { label: "Workshoplar" },
         ]}
         actions={
-          <Button render={<Link href="/admin/workshops/new" />}>
+          <Button render={<a href="/admin/workshops/new" />}>
             <PlusCircle size={16} />
             Yeni Workshop
           </Button>
